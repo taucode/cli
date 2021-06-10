@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
-using TauCode.Cli.Data;
+using System.Threading;
+using System.Threading.Tasks;
+using TauCode.Cli.Commands;
 using TauCode.Cli.Descriptors;
 using TauCode.Cli.Exceptions;
 using TauCode.Parsing.Exceptions;
@@ -13,7 +15,9 @@ namespace TauCode.Cli
     {
         ICliAddIn AddIn { get; }
         FallbackInterceptedCliException HandleFallback(FallbackNodeAcceptedTokenException ex);
-        void Process(IList<CliCommandEntry> entries);
         CliExecutorDescriptor Descriptor { get; }
+        void Process(IList<CliCommandEntry> entries);
+        Task ProcessAsync(IList<CliCommandEntry> entries, CancellationToken cancellationToken = default);
+
     }
 }

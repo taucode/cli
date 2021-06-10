@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TauCode.Cli.Data;
+using TauCode.Cli.Commands;
 using TauCode.Cli.Descriptors;
 using TauCode.Cli.Exceptions;
 using TauCode.Cli.Help;
@@ -123,7 +123,7 @@ namespace TauCode.Cli
 
         public static ICliFunctionalityProvider AddCustomHandler(
             this ICliFunctionalityProvider functionalityProvider,
-            Action handler,
+            Action<ICliFunctionalityProvider> handler,
             string tokenText)
         {
             if (handler == null)
@@ -144,7 +144,7 @@ namespace TauCode.Cli
                 true,
                 (node, token, resultAccumulator) =>
                 {
-                    handler();
+                    handler(functionalityProvider);
                     throw new CliCustomHandlerException();
                 },
                 family,
@@ -169,7 +169,7 @@ namespace TauCode.Cli
             }
 
             return functionalityProvider.AddCustomHandler(
-                () => functionalityProvider.Output.WriteLine(functionalityProvider.Version),
+                (x) => functionalityProvider.Output.WriteLine(x.Version),
                 "--version");
         }
 
@@ -188,8 +188,14 @@ namespace TauCode.Cli
             }
 
             return functionalityProvider.AddCustomHandler(
-                () => functionalityProvider.Output.WriteLine(functionalityProvider.GetHelp()),
+                (x) => functionalityProvider.Output.WriteLine(x.GetHelp()),
                 "--help");
+        }
+
+        public static ICliAddIn AddShellExit(this ICliAddIn addIn, string exitTokenText = "exit")
+        {
+            addIn.AddCustomHandler(x => throw new ExitShellException(), exitTokenText);
+            return addIn;
         }
 
         #endregion
@@ -417,20 +423,20 @@ namespace TauCode.Cli
             }
         }
 
-        public static CliCommand ParseLine(this ICliHost host, string line)
-        {
-            if (host == null)
-            {
-                throw new ArgumentNullException(nameof(host));
-            }
+        //public static CliCommand ParseLine(this ICliHost host, string line)
+        //{
+        //    if (host == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(host));
+        //    }
 
-            if (line == null)
-            {
-                throw new ArgumentNullException(nameof(line));
-            }
+        //    if (line == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(line));
+        //    }
 
-            return host.ParseCommand(new[] { line });
-        }
+        //    return host.ParseCommand(new[] { line });
+        //}
 
         #endregion
 

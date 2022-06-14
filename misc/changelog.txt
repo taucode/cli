@@ -10,7 +10,11 @@
 2021-06-05
 ==========
     1. Essential update started:
-        * async/await support
-        * shell concept
-        * tokens are passed to executors, not just strings.
+       * async/await support
+       * shell concept
+       * tokens are passed to executors, not just strings.
+
+2022-07-27
+==========
+    1. Huge changes in TauCode.Parsing are incorporated.
 

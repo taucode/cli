@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using TauCode.Cli.Data;
+using System.Threading;
+using System.Threading.Tasks;
+using TauCode.Cli.Commands;
 using TauCode.Cli.Exceptions;
-using TauCode.Extensions;
 using TauCode.Parsing;
 using TauCode.Parsing.Exceptions;
 using TauCode.Parsing.Lexing;
@@ -305,20 +306,14 @@ namespace TauCode.Cli
             return _addInList;
         }
 
-        public CliCommand ParseCommand(string[] input)
+        public CliCommand ParseCommand(string input)
         {
             if (input == null)
             {
                 throw new ArgumentNullException(nameof(input));
             }
 
-            if (input.Any(x => x == null))
-            {
-                throw new ArgumentException($"'{nameof(input)}' cannot contain nulls.", nameof(input));
-            }
-
-            var inputString = string.Join(" ", input);
-            var tokens = this.Lexer.Lexize(inputString);
+            var tokens = this.Lexer.Lexize(input);
 
             try
             {
@@ -363,6 +358,19 @@ namespace TauCode.Cli
             var executor = addInRecord.GetExecutor(command.ExecutorName);
 
             executor.Process(command.Entries);
+        }
+
+        public Task DispatchCommandAsync(CliCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
+            var addInRecord = this.GetAddInRecord(command.AddInName);
+            var executor = addInRecord.GetExecutor(command.ExecutorName);
+
+            return executor.ProcessAsync(command.Entries, cancellationToken);
         }
 
         #endregion

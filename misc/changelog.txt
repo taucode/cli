@@ -1,4 +1,19 @@
-2020-08-25
+2019-11-22
 ==========
-    1. 'Worker' renamed to 'Executor'.
+    Version: v3.0.0
+    1. Migrated from TauCode.Utils.
 
+2021-05-08
+==========
+    1. Resurrection started.
+
+2021-06-05
+==========
+    1. Essential update started:
+       * async/await support
+       * shell concept
+       * tokens are passed to executors, not just strings.
+
+2022-07-27
+==========
+    1. Huge changes in TauCode.Parsing are incorporated.

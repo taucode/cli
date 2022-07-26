@@ -1,64 +1,63 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="BadHostResources\UnnamedExecutor.lisp" />
-    <None Remove="HostResources\Curl\NoName\NoName.lisp" />
-    <None Remove="HostResources\Git\NoName\Branch.lisp" />
-    <None Remove="HostResources\Git\NoName\Checkout.lisp" />
-    <None Remove="HostResources\Git\NoName\Clone.lisp" />
-    <None Remove="HostResources\Kubectl\Apply\NoName.lisp" />
-    <None Remove="HostResources\Kubectl\Rollout\NoName.lisp" />
-    <None Remove="HostResources\Tau\Db\ClearAllTables.lisp" />
-    <None Remove="HostResources\Tau\Db\ConvertMetadata.lisp" />
-    <None Remove="HostResources\Tau\Db\DropAllTables.lisp" />
-    <None Remove="HostResources\Tau\Db\Migrate.lisp" />
-    <None Remove="HostResources\Tau\Db\SerializeData.lisp" />
-    <None Remove="HostResources\Tau\Db\SerializeMetadata.lisp" />
-    <None Remove="HostResources\Tau\WebApi\Controller.lisp" />
-    <None Remove="HostResources\Tau\WebApi\Cqrs.lisp" />
-    <None Remove="HostResources\Tau\WebApi\EchoInt.lisp" />
-    <None Remove="HostResources\Work\NoName\DisposeWorkerExecutor.lisp" />
-    <None Remove="HostResources\Work\NoName\GetWorkerInfoExecutor.lisp" />
-    <None Remove="HostResources\Work\NoName\PauseWorkerExecutor.lisp" />
-    <None Remove="HostResources\Work\NoName\ResumeWorkerExecutor.lisp" />
-    <None Remove="HostResources\Work\NoName\StartWorkerExecutor.lisp" />
-    <None Remove="HostResources\Work\NoName\StopWorkerExecutor.lisp" />
-    <None Remove="HostResources\Work\NoName\TimeoutWorkerExecutor.lisp" />
+    <None Remove="Apps\Curl\CurlExecutor.lisp" />
+    <None Remove="Apps\Git\Executors\Branch\BranchExecutor.lisp" />
+    <None Remove="Apps\Git\Executors\Checkout\CheckoutExecutor.lisp" />
+    <None Remove="Apps\Git\Executors\Clone\CloneExecutor.lisp" />
+    <None Remove="Apps\Kubectl\Modules\Create\CreateExecutor.lisp" />
+    <None Remove="Apps\Kubectl\Modules\TheDebug\DebugExecutor.lisp" />
+    <None Remove="Apps\Kubectl\Modules\Run\RunExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\Connect\ConnectExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\Disconnect\DisconnectExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\DropTables\DropTablesExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\EnumerateTables\EnumerateTablesExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\PurgeData\PurgeDataExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\Query\QueryExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\SerializeData\SerializeDataDataExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\SerializeMetadata\SerializeMetadataExecutor.lisp" />
+    <None Remove="Apps\Tau\Db\TableInfo\TableInfoExecutor.lisp" />
+    <None Remove="Apps\Tau\Email\Send\SendExecutor.lisp" />
+    <None Remove="Apps\Tau\Email\Settings\SettingsExecutor.lisp" />
+    <None Remove="Apps\Tau\LibDev\BumpVersion\BumpVersionExecutor.lisp" />
+    <None Remove="Apps\Tau\LibDev\CheckDevRelease\CheckDevReleaseExecutor.lisp" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="BadHostResources\UnnamedExecutor.lisp" />
-    <EmbeddedResource Include="BadHostResources\NamedExecutor.lisp" />
-    <EmbeddedResource Include="HostResources\Curl\NoName\NoName.lisp" />
-    <EmbeddedResource Include="HostResources\Git\NoName\Branch.lisp" />
-    <EmbeddedResource Include="HostResources\Git\NoName\Checkout.lisp" />
-    <EmbeddedResource Include="HostResources\Git\NoName\Clone.lisp" />
-    <EmbeddedResource Include="HostResources\Kubectl\Apply\NoName.lisp" />
-    <EmbeddedResource Include="HostResources\Kubectl\Rollout\NoName.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\Db\ClearAllTables.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\Db\ConvertMetadata.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\Db\DropAllTables.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\Db\Migrate.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\Db\SerializeData.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\Db\SerializeMetadata.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\WebApi\Controller.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\WebApi\EchoInt.lisp" />
-    <EmbeddedResource Include="HostResources\Tau\WebApi\Cqrs.lisp" />
-    <EmbeddedResource Include="HostResources\Work\NoName\DisposeWorkerExecutor.lisp" />
-    <EmbeddedResource Include="HostResources\Work\NoName\GetWorkerInfoExecutor.lisp" />
-    <EmbeddedResource Include="HostResources\Work\NoName\PauseWorkerExecutor.lisp" />
-    <EmbeddedResource Include="HostResources\Work\NoName\ResumeWorkerExecutor.lisp" />
-    <EmbeddedResource Include="HostResources\Work\NoName\StartWorkerExecutor.lisp" />
-    <EmbeddedResource Include="HostResources\Work\NoName\StopWorkerExecutor.lisp" />
-    <EmbeddedResource Include="HostResources\Work\NoName\TimeoutWorkerExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Curl\CurlExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Git\Executors\Branch\BranchExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Git\Executors\Checkout\CheckoutExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Git\Executors\Clone\CloneExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Kubectl\Modules\TheDebug\DebugExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Kubectl\Modules\Run\RunExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Kubectl\Modules\Create\CreateExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\Connect\ConnectExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\Disconnect\DisconnectExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\DropTables\DropTablesExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\EnumerateTables\EnumerateTablesExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\PurgeData\PurgeDataExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\Query\QueryExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\SerializeData\SerializeDataDataExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\SerializeMetadata\SerializeMetadataExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Db\TableInfo\TableInfoExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Email\Send\SendExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\Email\Settings\SettingsExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\LibDev\BumpVersion\BumpVersionExecutor.lisp" />
+    <EmbeddedResource Include="Apps\Tau\LibDev\CheckDevRelease\CheckDevReleaseExecutor.lisp" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TauCode.Cli\TauCode.Cli.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="TauCode.Db.SqlClient" Version="1.3.7" />
   </ItemGroup>
 
 </Project>

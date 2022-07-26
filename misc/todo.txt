@@ -9,18 +9,18 @@ db sd -c / - c .
 
 2020-01-18
 ==========
-    1. Lexer implementation produces weird exception "Unexpected char '<foo>'". Meanwhile, '<foo>' itself might be fine, it is the whole token who produces error.
-    2. UT kubectl (including port forwarding) and curl, and others.
-    3. Support integer args
-    4. Support help for hosts, add-ins and executors.
+x   1. Lexer implementation produces weird exception "Unexpected char '<foo>'". Meanwhile, '<foo>' itself might be fine, it is the whole token who produces error.
+x   2. UT kubectl (including port forwarding) and curl, and others.
++   3. Support integer args
+x   4. Support help for hosts, add-ins and executors.
 
 2020-01-31
 ==========
-    1. Consider 'NotSetTextWriter' to designate that Host's output was not set.
+x   1. Consider 'NotSetTextWriter' to designate that Host's output was not set.
 
 2020-03-24
 ==========
-    1. Add 'ConnectionStringProducer' since 'PathProducer' isn't good at connection strings.
+x   1. Add 'ConnectionStringProducer' since 'PathProducer' isn't good at connection strings.
 
 2020-08-25
 ==========
@@ -28,7 +28,25 @@ db sd -c / - c .
 
 2021-05-08
 ==========
-    1. Email text class
-    2. Consider async.
-    3. Resurrect knowledge about fallbacks.
+x   1. Email text class
++   2. Consider async.
+x   3. Resurrect knowledge about fallbacks.
     4. TinyLisp supports json
+
+2022-06-16
+==========
+    1. Consider elements (alternatives) (optional) (repeatable) and stuff
+    2. No mandatory :is-entrance, :is-exit in sequences
+    3. Get rid of 'Finalize vertices' concept.
+    4. Mind TokenProducerBase which checks context and stuff.
+    5. Support -- concept:
+            E.g.:
+                *   tau email send ... -a 'c:/temp/file.jpg' --subject      => will fail: --subject is tokenized as a legal key, not file path
+                *   tau email send ... -a 'c:/temp/file.jpg' -- --subject   => will pass: file.jpg will be attached with local name '--subject' which is weird but legal.
+                    maybe ITokenConverter should depend on current IParsingResult which in case of CLI library will keep info about consumed --.
+        Note: this might require IParser implementation's PreProcess concept. e.g. if this Parser meets '--', it does changes to IParsingCommand and goes on
+        without feeding the token to a node.
+
+2022-06-22
+==========
+    1. Get rid of ReadOnlyMemory<char>.

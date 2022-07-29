@@ -1,64 +1,61 @@
-﻿using System;
-using System.Collections.Generic;
-using TauCode.Parsing;
+﻿using TauCode.Parsing;
 
-namespace TauCode.Cli.Nodes
+namespace TauCode.Cli.Nodes;
+
+public class KeyValueNode : ParsingNodeBase
 {
-    public class KeyValueNode : ParsingNodeBase
+    public KeyValueNode(
+        string alias,
+        IEnumerable<Type> tokenTypes)
     {
-        public KeyValueNode(
-            string alias,
-            IEnumerable<Type> tokenTypes)
-        {
-            // todo checks
+        // todo checks
 
-            this.Alias = alias;
-            this.TokenTypes = new HashSet<Type>(tokenTypes);
+        this.Alias = alias;
+        this.TokenTypes = new HashSet<Type>(tokenTypes);
+    }
+
+    public string Alias { get; }
+
+    public HashSet<Type> TokenTypes { get; }
+
+    protected override bool AcceptsImpl(ParsingContext parsingContext)
+    {
+        var token = parsingContext.GetCurrentToken();
+        var parsingResult = parsingContext.ParsingResult;
+
+        if (this.TokenTypes.Contains(token.GetType()))
+        {
+            return true;
         }
 
-        public string Alias { get; }
-
-        public HashSet<Type> TokenTypes { get; }
-
-        protected override bool AcceptsImpl(ParsingContext parsingContext)
+        if (this.TokenConverter != null)
         {
-            var token = parsingContext.GetCurrentToken();
-            var parsingResult = parsingContext.ParsingResult;
-
-            if (this.TokenTypes.Contains(token.GetType()))
+            foreach (var tokenType in this.TokenTypes)
             {
-                return true;
-            }
-
-            if (this.TokenConverter != null)
-            {
-                foreach (var tokenType in this.TokenTypes)
+                var convertedToken = this.TokenConverter.Convert(token, tokenType, parsingResult);
+                if (convertedToken != null)
                 {
-                    var convertedToken = this.TokenConverter.Convert(token, tokenType, parsingResult);
-                    if (convertedToken != null)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
-
-            return false;
         }
 
-        protected override void ActImpl(ParsingContext parsingContext)
-        {
-            var token = parsingContext.GetCurrentToken();
-            var parsingResult = parsingContext.ParsingResult;
+        return false;
+    }
 
-            var command = (Command)parsingResult;
+    protected override void ActImpl(ParsingContext parsingContext)
+    {
+        var token = parsingContext.GetCurrentToken();
+        var parsingResult = parsingContext.ParsingResult;
 
-            command.KeyValues[this.Alias].Add(token);
-            command.IncreaseVersion();
-        }
+        var command = (Command)parsingResult;
 
-        protected override string GetDataTag()
-        {
-            return this.Alias;
-        }
+        command.KeyValues[this.Alias].Add(token);
+        command.IncreaseVersion();
+    }
+
+    protected override string GetDataTag()
+    {
+        return this.Alias;
     }
 }

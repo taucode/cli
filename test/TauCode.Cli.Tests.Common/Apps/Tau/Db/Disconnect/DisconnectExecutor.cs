@@ -1,32 +1,26 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace TauCode.Cli.Tests.Common.Apps.Tau.Db.Disconnect
+namespace TauCode.Cli.Tests.Common.Apps.Tau.Db.Disconnect;
+
+public class DisconnectExecutor : DbExecutor
 {
-    public class DisconnectExecutor : DbExecutor
+    public DisconnectExecutor(DbModule dbModule)
+        : base(
+            "disconnect",
+            $".{nameof(DisconnectExecutor)}.lisp",
+            dbModule)
     {
-        public DisconnectExecutor(DbModule dbModule)
-            : base(
-                "disconnect",
-                $".{nameof(DisconnectExecutor)}.lisp",
-                dbModule)
-        {
-        }
+    }
 
-        protected override Task ExecuteImplRealAsync(
-            Command command,
-            IExecutionContext executionContext,
-            CancellationToken cancellationToken = default)
-        {
-            this.ExecuteImplReal(command, executionContext);
+    protected override Task ExecuteImplRealAsync(
+        Command command,
+        ExecutionContext executionContext,
+        CancellationToken cancellationToken)
+    {
+        this.DbModule.Connection?.Dispose();
+        this.DbModule.Connection = null;
 
-            return Task.CompletedTask;
-        }
-
-        protected override void ExecuteImplReal(Command command, IExecutionContext executionContext)
-        {
-            this.DbModule.CurrentExecutionContext?.Dispose();
-            this.DbModule.CurrentExecutionContext = null;
-        }
+        return Task.CompletedTask;
     }
 }

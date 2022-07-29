@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using TauCode.Cli.Nodes;
+﻿using TauCode.Cli.Nodes;
 using TauCode.Data.Graphs;
 using TauCode.Parsing;
 using TauCode.Parsing.Graphs;
@@ -10,90 +7,89 @@ using TauCode.Parsing.Graphs.Molding;
 using TauCode.Parsing.Nodes;
 using TauCode.Parsing.TinyLisp.Data;
 
-namespace TauCode.Cli
+namespace TauCode.Cli;
+
+public class CliVertexFactory : IVertexFactory
 {
-    public class CliVertexFactory : IVertexFactory
+    public CliVertexFactory(ILexicalTokenTypeResolver tokenTypeResolver) // todo: Func might be enough.
     {
-        public CliVertexFactory(ILexicalTokenTypeResolver tokenTypeResolver) // todo: Func might be enough.
-        {
-            this.TokenTypeResolver = tokenTypeResolver;
-        }
+        this.TokenTypeResolver = tokenTypeResolver;
+    }
 
-        public ILexicalTokenTypeResolver TokenTypeResolver { get; }
+    public ILexicalTokenTypeResolver TokenTypeResolver { get; }
 
-        public virtual IVertex Create(IVertexMold vertexMold)
+    public virtual IVertex Create(IVertexMold vertexMold)
+    {
+        IParsingNode node;
+        if (vertexMold.Car is Symbol symbol)
         {
-            IParsingNode node;
-            if (vertexMold.Car is Symbol symbol)
+            switch (symbol.Name)
             {
-                switch (symbol.Name)
-                {
-                    case "CUSTOM-KEY":
-                        node = new CustomKeyNode(
-                            vertexMold.GetKeywordValue<List<string>>(":KEYS"));
-                        break;
+                case "CUSTOM-KEY":
+                    node = new CustomKeyNode(
+                        vertexMold.GetKeywordValue<List<string>>(":KEYS"));
+                    break;
 
-                    case "KEY":
-                        node = new KeyNode(
-                            vertexMold.GetKeywordValue<string>(":ALIAS", null),
-                            vertexMold.GetKeywordValue<List<string>>(":KEYS"));
-                        break;
+                case "KEY":
+                    node = new KeyNode(
+                        vertexMold.GetKeywordValue<string>(":ALIAS", null),
+                        vertexMold.GetKeywordValue<List<string>>(":KEYS"));
+                    break;
 
-                    case "VALUE":
-                        node = new KeyValueNode(
-                            vertexMold.GetKeywordValue<string>(":ALIAS"),
-                            vertexMold
-                                .GetKeywordValue<List<string>>(":TOKEN-TYPES")
-                                .Select(x => this.TokenTypeResolver.Resolve(x)));
-                        break;
-
-                    case "BOOLEAN":
-                        node = new BooleanNode();
-                        break;
-
-                    case "ARGUMENT":
-                        node = new ArgumentNode(
-                            vertexMold.GetKeywordValue<string>(":ALIAS"),
-                            vertexMold
-                                .GetKeywordValue<List<string>>(":TOKEN-TYPES")
-                                .Select(x => this.TokenTypeResolver.Resolve(x)));
-                        break;
-
-                    case "SOME-TEXT":
-                        node = new TextNode(vertexMold
+                case "VALUE":
+                    node = new KeyValueNode(
+                        vertexMold.GetKeywordValue<string>(":ALIAS"),
+                        vertexMold
                             .GetKeywordValue<List<string>>(":TOKEN-TYPES")
                             .Select(x => this.TokenTypeResolver.Resolve(x)));
-                        break;
+                    break;
 
-                    case "SWITCH":
-                        node = new SwitchNode(
-                            vertexMold.GetKeywordValue<string>(":ALIAS"),
-                            vertexMold.GetKeywordValue<List<string>>(":KEYS"));
-                        break;
+                case "BOOLEAN":
+                    node = new BooleanNode();
+                    break;
 
-                    case "IDLE":
-                        node = new IdleNode();
-                        break;
+                case "ARGUMENT":
+                    node = new ArgumentNode(
+                        vertexMold.GetKeywordValue<string>(":ALIAS"),
+                        vertexMold
+                            .GetKeywordValue<List<string>>(":TOKEN-TYPES")
+                            .Select(x => this.TokenTypeResolver.Resolve(x)));
+                    break;
 
-                    case "END":
-                        node = new EndNode();
-                        break;
+                case "SOME-TEXT":
+                    node = new TextNode(vertexMold
+                        .GetKeywordValue<List<string>>(":TOKEN-TYPES")
+                        .Select(x => this.TokenTypeResolver.Resolve(x)));
+                    break;
 
-                    case "FALLBACK":
-                        node = new FallbackNode();
-                        break;
+                case "SWITCH":
+                    node = new SwitchNode(
+                        vertexMold.GetKeywordValue<string>(":ALIAS"),
+                        vertexMold.GetKeywordValue<List<string>>(":KEYS"));
+                    break;
 
-                    default:
-                        throw new NotImplementedException($"error: unknown car for creation: '{symbol.Name}'.");
-                }
+                case "IDLE":
+                    node = new IdleNode();
+                    break;
+
+                case "END":
+                    node = new EndNode();
+                    break;
+
+                case "FALLBACK":
+                    node = new FallbackNode();
+                    break;
+
+                default:
+                    throw new NotImplementedException($"error: unknown car for creation: '{symbol.Name}'.");
             }
-            else
-            {
-                throw new NotImplementedException("error");
-            }
-
-            node.Name = vertexMold.Name;
-            return node;
         }
+        else
+        {
+            throw new NotImplementedException("error");
+        }
+
+        node.Name = vertexMold.Name;
+        return node;
     }
 }

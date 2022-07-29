@@ -1,33 +1,27 @@
-﻿using Serilog;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace TauCode.Cli;
 
-namespace TauCode.Cli
+public interface IReplHost : IExecutionContextBuilder
 {
-    public interface IReplHost
-    {
-        IReadOnlyList<IApp> Apps { get; }
+    IReadOnlyList<IApp> Apps { get; }
 
-        void AddApp(IApp app);
+    void AddApp(IApp app);
 
-        IApp GetApp(string appName);
+    IApp GetApp(string appName);
 
-        IApp CurrentApp { get; }
+    IApp? CurrentApp { get; }
 
-        IModule CurrentModule { get; }
+    IModule? CurrentModule { get; }
 
-        IExecutor CurrentExecutor { get; }
+    IExecutor? CurrentExecutor { get; }
+    //string? CurrentExecutorName { get; }
 
-        ILogger Logger { get; set; }
+    IReadOnlyList<ReplCommandProcessor> CommandProcessors { get; }
 
-        TextReader Input { get; set; }
+    void Run(string[]? script = null);
 
-        TextWriter Output { get; set; }
+    Task RunAsync(
+        string[]? script = null,
+        CancellationToken cancellationToken = default);
 
-        void Run();
-
-        Task RunAsync(CancellationToken cancellationToken = default);
-    }
+    void SetCurrentState(IApp? currentApp, IModule? currentModule, IExecutor? currentExecutor);
 }

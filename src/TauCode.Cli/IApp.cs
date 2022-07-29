@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
+﻿namespace TauCode.Cli;
 
-namespace TauCode.Cli
+public interface IApp
 {
-    public interface IApp
-    {
-        string Name { get; }
+    string Name { get; }
 
-        IReadOnlyList<IModule> Modules { get; }
+    IReadOnlyList<IModule> Modules { get; }
 
-        void AddModule(IModule module);
+    bool Contains(IModule module);
 
-        IModule GetModule(string moduleName);
-    }
+    void AddModule(IModule module);
+
+    IModule? GetModule(string? moduleName);
 }

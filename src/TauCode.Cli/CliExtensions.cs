@@ -1,116 +1,115 @@
 ﻿using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using TauCode.Cli.Exceptions;
 using TauCode.Parsing;
 
-namespace TauCode.Cli
+// todo clean
+namespace TauCode.Cli;
+
+public static class CliExtensions
 {
-    public static class CliExtensions
+    public static async Task ExecuteAsync(
+        this IApp app,
+        string appInput,
+        ILogger logger,
+        TextReader input,
+        TextWriter output,
+        CancellationToken cancellationToken = default)
     {
-        public static async Task ExecuteAsync(
-            this IApp app,
-            string appInput,
-            ILogger logger,
-            TextReader input,
-            TextWriter output,
-            CancellationToken cancellationToken = default)
-        {
-            var success = false;
-            IModule module = null;
-            IExecutor executor = null;
+        throw new NotImplementedException();
 
-            do
-            {
-                var modules = app.Modules;
-                if (modules.Count != 1)
-                {
-                    break;
-                }
+        //var success = false;
+        //IModule module = null;
+        //IExecutor executor = null;
 
-                module = modules[0];
-                if (module.Name != null)
-                {
-                    break;
-                }
+        //do
+        //{
+        //    var modules = app.Modules;
+        //    if (modules.Count != 1)
+        //    {
+        //        break;
+        //    }
 
-                var executors = module.Executors;
-                if (executors.Count != 1)
-                {
-                    break;
-                }
+        //    module = modules[0];
+        //    if (module.Name != null)
+        //    {
+        //        break;
+        //    }
 
-                executor = executors[0];
-                if (executor.Name != null)
-                {
-                    break;
-                }
+        //    var executors = module.Executors;
+        //    if (executors.Count != 1)
+        //    {
+        //        break;
+        //    }
 
-                success = true;
+        //    executor = executors[0];
+        //    if (executor.Name != null)
+        //    {
+        //        break;
+        //    }
 
-            } while (false);
+        //    success = true;
 
-            if (!success)
-            {
-                throw new CliException($"Extension method '{nameof(IApp)}.{nameof(ExecuteAsync)}' is only valid for an app which has single nameless module which in turn has single nameless executor.");
-            }
+        //} while (false);
 
-            var executionContext = module.CreateExecutionContext(logger, input, output);
+        //if (!success)
+        //{
+        //    throw new CliException($"Extension method '{nameof(IApp)}.{nameof(ExecuteAsync)}' is only valid for an app which has single nameless module which in turn has single nameless executor.");
+        //}
 
-            var tokens = module.Lexer.Tokenize(appInput.AsMemory());
-            await executor.ExecuteAsync(tokens, executionContext, cancellationToken);
-        }
+        //var executionContext = module.CreateExecutionContext(logger, input, output);
 
-        public static async Task ExecuteAsync(
-            this IModule module,
-            string moduleInput,
-            ILogger logger,
-            TextReader input,
-            TextWriter output,
-            CancellationToken cancellationToken = default)
-        {
-            var success = false;
-            IExecutor executor = null;
+        //var tokens = module.Lexer.Tokenize(appInput.AsMemory());
+        //await executor.ExecuteAsync(tokens, executionContext, cancellationToken);
+    }
 
-            do
-            {
-                var executors = module.Executors;
-                if (executors.Count != 1)
-                {
-                    break;
-                }
+    public static async Task ExecuteAsync(
+        this IModule module,
+        string moduleInput,
+        ILogger logger,
+        TextReader input,
+        TextWriter output,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
 
-                executor = executors[0];
-                if (executor.Name != null)
-                {
-                    break;
-                }
+        //var success = false;
+        //IExecutor executor = null;
 
-                success = true;
+        //do
+        //{
+        //    var executors = module.Executors;
+        //    if (executors.Count != 1)
+        //    {
+        //        break;
+        //    }
 
-            } while (false);
+        //    executor = executors[0];
+        //    if (executor.Name != null)
+        //    {
+        //        break;
+        //    }
 
-            if (!success)
-            {
-                throw new CliException($"Extension method '{nameof(IModule)}.{nameof(ExecuteAsync)}' is only valid for a module which has single nameless executor.");
-            }
+        //    success = true;
 
-            var executionContext = module.CreateExecutionContext(logger, input, output);
+        //} while (false);
 
-            var tokens = module.Lexer.Tokenize(moduleInput.AsMemory());
-            await executor.ExecuteAsync(tokens, executionContext, cancellationToken);
-        }
+        //if (!success)
+        //{
+        //    throw new CliException($"Extension method '{nameof(IModule)}.{nameof(ExecuteAsync)}' is only valid for a module which has single nameless executor.");
+        //}
 
-        public static async Task ExecuteAsync(
-            this IModule module,
-            IEnumerable<ILexicalToken> rawTokens,
-            ILogger logger,
-            TextReader input,
-            TextWriter output,
-            CancellationToken cancellationToken = default) =>
+        //var executionContext = module.CreateExecutionContext(logger, input, output);
+
+        //var tokens = module.Lexer.Tokenize(moduleInput.AsMemory());
+        //await executor.ExecuteAsync(tokens, executionContext, cancellationToken);
+    }
+
+    public static async Task ExecuteAsync(
+        this IModule module,
+        IEnumerable<ILexicalToken> rawTokens,
+        ILogger logger,
+        TextReader input,
+        TextWriter output,
+        CancellationToken cancellationToken = default) =>
         await ExecuteAsync(
             module,
             string.Join(" ", rawTokens),
@@ -119,5 +118,4 @@ namespace TauCode.Cli
             output,
             cancellationToken);
 
-    }
 }

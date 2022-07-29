@@ -1,98 +1,98 @@
-﻿using System;
-using TauCode.Data.Text.TextDataExtractors;
+﻿using TauCode.Data.Text.TextDataExtractors;
 
-namespace TauCode.Cli
+namespace TauCode.Cli;
+
+// todo: internal?
+public class ReplContext
 {
-    public class ReplContext
+    private readonly KeyExtractor _keyExtractor;
+    private readonly TermExtractor _termExtractor;
+
+    public ReplContext(ReplHost replHost)
     {
-        private readonly KeyExtractor _keyExtractor;
-        private readonly TermExtractor _termExtractor;
+        this.ReplHost = replHost;
+        _keyExtractor = new KeyExtractor(CliHelper.IsCliWhiteSpace);
+        _termExtractor = new TermExtractor(CliHelper.IsCliWhiteSpace);
+    }
 
-        private ReadOnlyMemory<char> _input;
+    public ReplHost ReplHost { get; }
 
-        public ReplContext()
+    public ReadOnlyMemory<char> Input { get; set; }
+    protected int Position { get; private set; }
+    public ReadOnlyMemory<char> RemainingInput => this.Input[this.Position..];
+
+    private void SkipWhiteSpace()
+    {
+        var pos = this.Position;
+        var span = this.Input.Span;
+        while (true)
         {
-            _keyExtractor = new KeyExtractor(CliHelper.IsCliWhiteSpace);
-            _termExtractor = new TermExtractor(CliHelper.IsCliWhiteSpace);
-        }
-
-        public int Position;
-
-        public IApp App { get; set; }
-        public IModule Module { get; set; }
-        public IExecutor Executor { get; set; }
-        public IExecutionContext ExecutionContext { get; set; }
-
-        public void Reset(string input)
-        {
-            _input = input.AsMemory();
-            this.Position = 0;
-
-            this.App = null;
-            this.Module = null;
-            this.Executor = null;
-            this.ExecutionContext = null;
-        }
-
-        public void ResetPosition()
-        {
-            this.Position = 0;
-        }
-
-        public void SkipWhiteSpace()
-        {
-            var span = _input.Span[this.Position..];
-            if (span.Length == 0)
+            if (pos == this.Input.Length)
             {
-                return;
+                break;
             }
 
-            var pos = 0;
-
-            while (CliHelper.IsCliWhiteSpace(span, pos))
+            var isWhiteSpace = CliHelper.IsCliWhiteSpace(span, pos);
+            if (isWhiteSpace)
             {
-                pos++;
+                // go on
+            }
+            else
+            {
+                break;
             }
 
-            this.Position += pos;
+            pos++;
         }
 
-        public string TryExtractTerm()
+        this.Position = pos;
+    }
+
+    public void Reset(string input)
+    {
+        this.Input = input.AsMemory();
+        this.Position = 0;
+    }
+
+    public string? TryExtractKey()
+    {
+        var result = _keyExtractor.TryExtract(this.RemainingInput.Span, out var key);
+
+        if (key == null)
         {
-            this.SkipWhiteSpace();
-            var span = _input.Span[this.Position..];
-
-            var result = _termExtractor.TryExtract(span, out var term);
-            if (result.ErrorCode.HasValue)
-            {
-                return null;
-            }
-
-            this.Position += result.CharsConsumed;
-
-            this.SkipWhiteSpace();
-
-            return term;
+            return null;
         }
 
-        public string TryExtractKey()
+        this.Position += result.CharsConsumed;
+
+        this.SkipWhiteSpace();
+
+        return key;
+    }
+
+    public string? TryExtractTerm()
+    {
+        var result = _termExtractor.TryExtract(this.RemainingInput.Span, out var term);
+
+        if (term == null)
         {
-            this.SkipWhiteSpace();
-            var span = _input.Span[this.Position..];
-
-            var result = _keyExtractor.TryExtract(span, out var key);
-            if (result.ErrorCode.HasValue)
-            {
-                return null;
-            }
-
-            this.Position += result.CharsConsumed;
-
-            this.SkipWhiteSpace();
-
-            return key;
+            return null;
         }
 
-        public ReadOnlyMemory<char> RemainingInput => _input[this.Position..];
+        this.Position += result.CharsConsumed;
+
+        this.SkipWhiteSpace();
+
+        return term;
+    }
+
+    public void Rewind()
+    {
+        this.Position = 0;
+    }
+
+    public bool IsEndOfInput()
+    {
+        return this.Position == this.Input.Length;
     }
 }

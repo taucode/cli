@@ -1,22 +1,21 @@
 ﻿using System;
 using TauCode.Cli.Tests.Common.Apps.Git.Tokens;
 
-namespace TauCode.Cli.Tests.Common.Apps.Git
+namespace TauCode.Cli.Tests.Common.Apps.Git;
+
+public class GitTokenTypeResolver : CliTokenTypeResolver
 {
-    public class GitTokenTypeResolver : CliTokenTypeResolver
+    public override Type Resolve(string tokenTypeTag)
     {
-        public override Type Resolve(string tokenTypeTag)
+        switch (tokenTypeTag)
         {
-            switch (tokenTypeTag)
-            {
-                case "branch-name":
-                    return typeof(BranchNameToken);
+            case "branch-name":
+                return typeof(BranchNameToken);
 
-                case "ref-name":
-                    return typeof(RefNameToken);
-            }
-
-            return base.Resolve(tokenTypeTag);
+            case "ref-name":
+                return typeof(RefNameToken);
         }
+
+        return base.Resolve(tokenTypeTag);
     }
 }

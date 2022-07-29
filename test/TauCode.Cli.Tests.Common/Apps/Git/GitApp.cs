@@ -1,11 +1,10 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Git
+﻿namespace TauCode.Cli.Tests.Common.Apps.Git;
+
+public class GitApp : App
 {
-    public class GitApp : App
+    public GitApp()
+        : base("git")
     {
-        public GitApp()
-            : base("git")
-        {
-            this.AddModule(new GitModule());
-        }
+        this.AddModule(new GitModule());
     }
 }

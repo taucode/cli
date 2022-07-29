@@ -6,43 +6,42 @@ using TauCode.Parsing.Graphs.Reading;
 using TauCode.Parsing.Graphs.Reading.Impl;
 using TauCode.Parsing.TinyLisp.Data;
 
-namespace TauCode.Cli.Reading
+namespace TauCode.Cli.Reading;
+
+public class OptionalElementReader : GroupReader
 {
-    public class OptionalElementReader : GroupReader
+    public OptionalElementReader(IGraphScriptReader scriptReader)
+        : base(scriptReader)
     {
-        public OptionalElementReader(IGraphScriptReader scriptReader)
-            : base(scriptReader)
+    }
+
+    protected override void CustomizeContent(IScriptElementMold scriptElementMold, Element element)
+    {
+        var groupMold = (GroupMold)scriptElementMold;
+
+        var linkables = groupMold.Linkables;
+        if (linkables.Count != 1)
         {
+            throw new CliException("'optional' wants exactly one child.");
         }
 
-        protected override void CustomizeContent(IScriptElementMold scriptElementMold, Element element)
+        var linkable = linkables[0];
+        var optionalEntrance = new VertexMold(groupMold, Symbol.Create("idle"))
         {
-            var groupMold = (GroupMold)scriptElementMold;
+            IsEntrance = true,
+        };
 
-            var linkables = groupMold.Linkables;
-            if (linkables.Count != 1)
-            {
-                throw new CliException("'optional' wants exactly one child.");
-            }
+        var optionalExit = new VertexMold(groupMold, Symbol.Create("idle"))
+        {
+            IsExit = true,
+        };
 
-            var linkable = linkables[0];
-            var optionalEntrance = new VertexMold(groupMold, Symbol.Create("idle"))
-            {
-                IsEntrance = true,
-            };
+        optionalEntrance.AddLinkTo(linkable.GetEntranceVertexOrThrow());
+        optionalEntrance.AddLinkTo(optionalExit);
 
-            var optionalExit = new VertexMold(groupMold, Symbol.Create("idle"))
-            {
-                IsExit = true,
-            };
+        linkable.GetExitVertexOrThrow().AddLinkTo(optionalExit);
 
-            optionalEntrance.AddLinkTo(linkable.GetEntranceVertexOrThrow());
-            optionalEntrance.AddLinkTo(optionalExit);
-
-            linkable.GetExitVertexOrThrow().AddLinkTo(optionalExit);
-
-            groupMold.Add(optionalEntrance);
-            groupMold.Add(optionalExit);
-        }
+        groupMold.Add(optionalEntrance);
+        groupMold.Add(optionalExit);
     }
 }

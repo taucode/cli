@@ -1,35 +1,33 @@
-﻿using System;
-using TauCode.Parsing.Tokens;
+﻿using TauCode.Parsing.Tokens;
 
-namespace TauCode.Cli
+namespace TauCode.Cli;
+
+public class CliTokenTypeResolver : ILexicalTokenTypeResolver
 {
-    public class CliTokenTypeResolver : ILexicalTokenTypeResolver
+    public virtual Type Resolve(string tokenTypeTag)
     {
-        public virtual Type Resolve(string tokenTypeTag)
+        switch (tokenTypeTag)
         {
-            switch (tokenTypeTag)
-            {
-                case "string":
-                    return typeof(StringToken);
+            case "string":
+                return typeof(StringToken);
 
-                case "uri":
-                    return typeof(UriToken);
+            case "uri":
+                return typeof(UriToken);
 
-                case "file-path":
-                    return typeof(FilePathToken);
+            case "file-path":
+                return typeof(FilePathToken);
 
-                case "host-name":
-                    return typeof(HostNameToken);
+            case "host-name":
+                return typeof(HostNameToken);
 
-                case "email-address":
-                    return typeof(EmailAddressToken);
+            case "email-address":
+                return typeof(EmailAddressToken);
 
-                case "integer":
-                    return typeof(Int32Token);
+            case "integer":
+                return typeof(Int32Token);
 
-                default:
-                    throw new NotImplementedException($"error: unknown token type tag: '{tokenTypeTag}'.");
-            }
+            default:
+                throw new NotImplementedException($"error: unknown token type tag: '{tokenTypeTag}'.");
         }
     }
 }

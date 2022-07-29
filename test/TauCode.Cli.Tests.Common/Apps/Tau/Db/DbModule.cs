@@ -1,5 +1,5 @@
-﻿using Serilog;
-using System.IO;
+﻿using System.Data;
+using System.Text;
 using TauCode.Cli.Tests.Common.Apps.Tau.Db.Connect;
 using TauCode.Cli.Tests.Common.Apps.Tau.Db.Disconnect;
 using TauCode.Cli.Tests.Common.Apps.Tau.Db.DropTables;
@@ -10,32 +10,41 @@ using TauCode.Cli.Tests.Common.Apps.Tau.Db.SerializeData;
 using TauCode.Cli.Tests.Common.Apps.Tau.Db.SerializeMetadata;
 using TauCode.Cli.Tests.Common.Apps.Tau.Db.TableInfo;
 
-namespace TauCode.Cli.Tests.Common.Apps.Tau.Db
+namespace TauCode.Cli.Tests.Common.Apps.Tau.Db;
+
+public class DbModule : Module
 {
-    public class DbModule : Module
+    public DbModule(bool isReal)
+        : base("db")
     {
-        public DbModule(bool isReal)
-            : base("db", DbHelper.Lexer)
-        {
-            this.AddExecutors(
-                new ConnectExecutor(this),
-                new DisconnectExecutor(this),
-                new DropTablesExecutor(this),
-                new EnumerateTablesExecutor(this),
-                new PurgeDataExecutor(this),
-                new QueryExecutor(this),
-                new SerializeDataDataExecutor(this),
-                new SerializeMetadataExecutor(this),
-                new TableInfoExecutor(this));
+        this.AddExecutors(
+            new ConnectExecutor(this),
+            new DisconnectExecutor(this),
+            new DropTablesExecutor(this),
+            new EnumerateTablesExecutor(this),
+            new PurgeDataExecutor(this),
+            new QueryExecutor(this),
+            new SerializeDataDataExecutor(this),
+            new SerializeMetadataExecutor(this),
+            new TableInfoExecutor(this));
 
-            this.IsReal = isReal;
+        this.IsReal = isReal;
+    }
+
+    public bool IsReal { get; }
+
+    public IDbConnection? Connection { get; set; }
+
+    public override string? ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append(this.Name);
+
+        if (this.Connection != null)
+        {
+            sb.Append($"[{this.Connection.Database}]");
         }
 
-        public bool IsReal { get; }
-
-        public override IExecutionContext CreateExecutionContext(ILogger logger, TextReader input, TextWriter output)
-        {
-            return new DbExecutionContext(logger, input, output, null);
-        }
+        return sb.ToString();
     }
 }

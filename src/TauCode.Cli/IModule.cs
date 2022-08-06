@@ -1,27 +1,14 @@
-﻿using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using TauCode.Parsing;
+﻿namespace TauCode.Cli;
 
-namespace TauCode.Cli
+public interface IModule
 {
-    public interface IModule
-    {
-        string Name { get; }
+    string? Name { get; }
 
-        ILexer Lexer { get; }
+    IReadOnlyList<IExecutor> Executors { get; }
 
-        IReadOnlyList<IExecutor> Executors { get; }
+    bool Contains(IExecutor executor);
 
-        void AddExecutor(IExecutor executor);
+    void AddExecutor(IExecutor executor);
 
-        IExecutor GetExecutor(string executorName);
-
-        IExecutionContext CreateExecutionContext(ILogger logger, TextReader input, TextWriter output);
-
-        IExecutionContext CurrentExecutionContext { get; set; }
-
-        event Action<IModule> CurrentExecutionContextChanged;
-    }
+    IExecutor? GetExecutor(string? executorName);
 }

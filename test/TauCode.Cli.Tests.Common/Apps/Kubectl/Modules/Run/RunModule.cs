@@ -1,11 +1,10 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Run
+﻿namespace TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Run;
+
+public class RunModule : KubectlModule
 {
-    public class RunModule : KubectlModule
+    public RunModule()
+        : base("run")
     {
-        public RunModule()
-            : base("run")
-        {
-            this.AddExecutor(new RunExecutor());
-        }
+        this.AddExecutor(new RunExecutor());
     }
 }

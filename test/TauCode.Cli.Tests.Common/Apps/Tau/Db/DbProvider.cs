@@ -1,8 +1,8 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Tau.Db
+﻿namespace TauCode.Cli.Tests.Common.Apps.Tau.Db;
+
+public enum DbProvider
 {
-    public enum DbProvider
-    {
-        SqlServer = 1,
-        PostgreSql = 2,
-    }
+    SqlServer = 1,
+    PostgreSql = 2,
+    SQLite = 3,
 }

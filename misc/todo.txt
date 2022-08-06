@@ -31,14 +31,14 @@ x   1. Add 'ConnectionStringProducer' since 'PathProducer' isn't good at connect
 x   1. Email text class
 +   2. Consider async.
 x   3. Resurrect knowledge about fallbacks.
-    4. TinyLisp supports json
+x   4. TinyLisp supports json
 
 2022-06-16
 ==========
-    1. Consider elements (alternatives) (optional) (repeatable) and stuff
-    2. No mandatory :is-entrance, :is-exit in sequences
-    3. Get rid of 'Finalize vertices' concept.
-    4. Mind TokenProducerBase which checks context and stuff.
++   1. Consider elements (alternatives) (optional) (repeatable) and stuff
++   2. No mandatory :is-entrance, :is-exit in sequences
++   3. Get rid of 'Finalize vertices' concept.
++   4. Mind TokenProducerBase which checks context and stuff.
     5. Support -- concept:
             E.g.:
                 *   tau email send ... -a 'c:/temp/file.jpg' --subject      => will fail: --subject is tokenized as a legal key, not file path
@@ -49,4 +49,8 @@ x   3. Resurrect knowledge about fallbacks.
 
 2022-06-22
 ==========
-    1. Get rid of ReadOnlyMemory<char>.
+x   1. Get rid of ReadOnlyMemory<char>.
+
+2022-07-29
+==========
+    1. Executor might want its own Lexer. E.g. ComSpec emulation

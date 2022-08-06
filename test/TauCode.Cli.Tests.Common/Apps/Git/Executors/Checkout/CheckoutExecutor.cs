@@ -1,12 +1,11 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Git.Executors.Checkout
+﻿namespace TauCode.Cli.Tests.Common.Apps.Git.Executors.Checkout;
+
+public class CheckoutExecutor : GitExecutor
 {
-    public class CheckoutExecutor : TestExecutorBase
+    public CheckoutExecutor()
+        : base(
+            "checkout",
+            $".{nameof(CheckoutExecutor)}.lisp")
     {
-        public CheckoutExecutor()
-            : base(
-                "checkout",
-                GitHelper.BuildParsingGraph($".{nameof(CheckoutExecutor)}.lisp"))
-        {
-        }
     }
 }

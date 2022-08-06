@@ -1,11 +1,10 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Create
+﻿namespace TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Create;
+
+public class CreateModule : KubectlModule
 {
-    public class CreateModule : KubectlModule
+    public CreateModule()
+        : base("create")
     {
-        public CreateModule()
-            : base("create")
-        {
-            this.AddExecutor(new CreateExecutor());
-        }
+        this.AddExecutor(new CreateExecutor());
     }
 }

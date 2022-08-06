@@ -8,10 +8,7 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var replHost = new TauReplHost(true);
-
-        replHost.Input = Console.In;
-        replHost.Output = Console.Out;
+        var replHost = new TauReplHost(Console.In, Console.Out, true);
 
         await replHost.RunAsync();
     }

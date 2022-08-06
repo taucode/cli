@@ -1,10 +1,12 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Create
+﻿namespace TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Create;
+
+public class CreateExecutor : TestExecutorBase
 {
-    public class CreateExecutor : TestExecutorBase
+    public CreateExecutor()
+        : base(
+            null,
+            KubectlHelper.Lexer,
+            $".{nameof(CreateExecutor)}.lisp")
     {
-        public CreateExecutor()
-            : base(null, KubectlHelper.BuildParsingGraph($".{nameof(CreateExecutor)}.lisp"))
-        {
-        }
     }
 }

@@ -1,9 +1,8 @@
 ﻿using NUnit.Framework;
 
-namespace TauCode.Cli.Tests.ReplHost
+namespace TauCode.Cli.Tests.ReplHost;
+
+[TestFixture]
+public class ReplHostTests
 {
-    [TestFixture]
-    public class ReplHostTests
-    {
-    }
 }

@@ -1,75 +1,49 @@
-﻿using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using TauCode.Cli.Tests.Common.Apps.Git.TokenProducers;
-using TauCode.Data.Graphs;
 using TauCode.Extensions;
 using TauCode.Parsing;
-using TauCode.Parsing.Nodes;
 using TauCode.Parsing.TokenProducers;
 
-namespace TauCode.Cli.Tests.Common.Apps.Git
+namespace TauCode.Cli.Tests.Common.Apps.Git;
+
+public static class GitHelper
 {
-    // todo clean
-    public static class GitHelper
+    private static readonly CliGraphParser GraphParser = new(
+        new CliGraphScriptReader(),
+        new CliGraphBuilder(
+            new CliVertexFactory(new GitTokenTypeResolver())));
+
+    public static bool IsValidBranchName(string text)
     {
-        private static readonly CliGraphScriptReader ScriptReader =
-            new CliGraphScriptReader(new CliVertexFactory(new GitTokenTypeResolver()));
+        const string pattern = @"^[a-zA-Z\d]([a-zA-Z\d-]|/[a-zA-Z\d-])*$";
+        return Regex.IsMatch(text, pattern);
+    }
 
-        private static readonly GitTokenConverter TokenConverter = new GitTokenConverter();
+    public static bool IsValidRefName(string text)
+    {
+        const string pattern = @"^([0-9a-f]{7}|HEAD(~\d+)?)$";
+        return Regex.IsMatch(text, pattern);
+    }
 
-        public static IGraph BuildParsingGraph(string resourceName)
+    public static ILexer Lexer = new Lexer
+    {
+        Producers = new ILexicalTokenProducer[]
         {
-            var script = typeof(Helper).Assembly.GetResourceText(resourceName, true);
-            var graph = ScriptReader.BuildGraph(script);
+            new WhiteSpaceProducer(),
+            // todo place FilePathProducer here to test token conversion.
 
-            var nodesWhichCanConvertTokens = graph
-                .Where(x => !x.GetType().IsIn(typeof(IdleNode), typeof(EndNode)))
-                .Cast<IParsingNode>()
-                .ToList();
+            new KeyProducer(CliHelper.IsCliWhiteSpace),
+            new UriProducer(CliHelper.IsCliWhiteSpace),
+            new BranchNameProducer(),
+            new RefNameProducer(),
+            new FilePathProducer(CliHelper.IsCliWhiteSpace),
+        },
+    };
 
-            nodesWhichCanConvertTokens.ForEach(x => x.TokenConverter = TokenConverter);
-
-            return graph;
-        }
-
-        internal static IParsingNode BuildParsingNode(string resourceName)
-        {
-            var graph = BuildParsingGraph(resourceName);
-            var node = ScriptReader.ResolveParsingNode(graph);
-
-            return node;
-        }
-
-        public static bool IsValidBranchName(string text)
-        {
-            const string pattern = @"^[a-zA-Z\d]([a-zA-Z\d-]|/[a-zA-Z\d-])*$";
-            return Regex.IsMatch(text, pattern);
-        }
-
-        public static bool IsValidRefName(string text)
-        {
-            const string pattern = @"^([0-9a-f]{7}|HEAD(~\d+)?)$";
-            return Regex.IsMatch(text, pattern);
-        }
-
-        public static ILexer CreateGitLexer()
-        {
-            var lexer = new Lexer
-            {
-                Producers = new ILexicalTokenProducer[]
-                {
-                    new WhiteSpaceProducer(),
-                    // todo place FilePathProducer here to test token conversion.
-
-                    new KeyProducer(CliHelper.IsCliWhiteSpace),
-                    new UriProducer(CliHelper.IsCliWhiteSpace),
-                    new BranchNameProducer(),
-                    new RefNameProducer(),
-                    new FilePathProducer(CliHelper.IsCliWhiteSpace),
-                },
-            };
-
-            return lexer;
-        }
+    public static CliGraph BuildCliGraph(string graphResourceName)
+    {
+        var script = typeof(GitHelper).Assembly.GetResourceText(graphResourceName, true);
+        var graph = GraphParser.ParseScript(script);
+        return graph;
     }
 }

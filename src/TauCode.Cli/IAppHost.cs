@@ -1,22 +1,18 @@
 ﻿using Serilog;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace TauCode.Cli
+namespace TauCode.Cli;
+
+public interface IAppHost : IDisposable
 {
-    public interface IAppHost
-    {
-        IApp App { get; }
+    IApp App { get; }
 
-        ILogger Logger { get; set; }
+    ILogger? Logger { get; set; }
 
-        TextReader Input { get; set; }
+    TextReader? Input { get; set; }
 
-        TextWriter Output { get; set; }
+    TextWriter? Output { get; set; }
 
-        void Run(string[] args);
+    void Run(ReadOnlyMemory<char> input);
 
-        Task RunAsync(string[] args, CancellationToken cancellationToken = default);
-    }
+    Task RunAsync(ReadOnlyMemory<char> input, CancellationToken cancellationToken = default);
 }

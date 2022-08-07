@@ -2,16 +2,15 @@
 using TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Run;
 using TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.TheDebug;
 
-namespace TauCode.Cli.Tests.Common.Apps.Kubectl
+namespace TauCode.Cli.Tests.Common.Apps.Kubectl;
+
+public class KubectlApp : App
 {
-    public class KubectlApp : App
+    public KubectlApp()
+        : base("kubectl")
     {
-        public KubectlApp()
-            : base("kubectl")
-        {
-            this.AddModule(new CreateModule());
-            this.AddModule(new RunModule());
-            this.AddModule(new DebugModule());
-        }
+        this.AddModule(new CreateModule());
+        this.AddModule(new RunModule());
+        this.AddModule(new DebugModule());
     }
 }

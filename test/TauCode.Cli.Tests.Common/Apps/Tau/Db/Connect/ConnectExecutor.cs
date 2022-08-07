@@ -3,41 +3,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using TauCode.Extensions;
 
-namespace TauCode.Cli.Tests.Common.Apps.Tau.Db.Connect
+namespace TauCode.Cli.Tests.Common.Apps.Tau.Db.Connect;
+
+public class ConnectExecutor : DbExecutor
 {
-    public class ConnectExecutor : DbExecutor
+    public ConnectExecutor(DbModule dbModule)
+        : base(
+            "connect",
+            $".{nameof(ConnectExecutor)}.lisp",
+            dbModule)
     {
-        public ConnectExecutor(
-            DbModule dbModule)
-            : base(
-                "connect",
-                $".{nameof(ConnectExecutor)}.lisp",
-                dbModule)
-        {
-        }
+    }
 
-        protected override Task ExecuteImplRealAsync(
-            Command command,
-            IExecutionContext executionContext,
-            CancellationToken cancellationToken = default)
-        {
-            this.ExecuteImplReal(command, executionContext);
-            return Task.CompletedTask;
-        }
+    protected override Task ExecuteImplRealAsync(
+        Command command,
+        ExecutionContext executionContext,
+        CancellationToken cancellationToken)
+    {
+        var provider = command.KeyValues["provider"].Single()!.ToString()!.ToEnum<DbProvider>();
+        var connectionString = command.KeyValues["connection"].Single().ToString();
 
-        protected override void ExecuteImplReal(Command command, IExecutionContext executionContext)
-        {
-            var provider = command.KeyValues["provider"].Single().ToString().ToEnum<DbProvider>();
-            var connectionString = command.KeyValues["connection"].Single().ToString();
+        var connection = DbHelper.CreateConnection(connectionString!, provider);
 
-            var connection = DbHelper.CreateConnection(connectionString, provider);
+        this.DbModule.Connection?.Dispose();
+        this.DbModule.Connection = connection;
 
-            this.DbModule.CurrentExecutionContext?.Dispose();
-            this.DbModule.CurrentExecutionContext = new DbExecutionContext(
-                executionContext.Logger,
-                executionContext.Input,
-                executionContext.Output,
-                connection);
-        }
+        return Task.CompletedTask;
     }
 }

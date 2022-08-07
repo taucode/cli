@@ -1,12 +1,11 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Git.Executors.Clone
+﻿namespace TauCode.Cli.Tests.Common.Apps.Git.Executors.Clone;
+
+public class CloneExecutor : GitExecutor
 {
-    public class CloneExecutor : TestExecutorBase
+    public CloneExecutor()
+        : base(
+            "clone",
+            $".{nameof(CloneExecutor)}.lisp")
     {
-        public CloneExecutor()
-            : base(
-                "clone",
-                GitHelper.BuildParsingGraph($".{nameof(CloneExecutor)}.lisp"))
-        {
-        }
     }
 }

@@ -1,10 +1,12 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Run
+﻿namespace TauCode.Cli.Tests.Common.Apps.Kubectl.Modules.Run;
+
+public class RunExecutor : TestExecutorBase
 {
-    public class RunExecutor : TestExecutorBase
+    public RunExecutor()
+        : base(
+            null,
+            KubectlHelper.Lexer,
+            $".{nameof(RunExecutor)}.lisp")
     {
-        public RunExecutor()
-            : base(null, KubectlHelper.BuildParsingGraph($".{nameof(RunExecutor)}.lisp"))
-        {
-        }
     }
 }

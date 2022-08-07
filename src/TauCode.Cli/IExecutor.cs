@@ -1,19 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using TauCode.Parsing;
+﻿namespace TauCode.Cli;
 
-namespace TauCode.Cli
+public interface IExecutor : IDisposable
 {
-    public interface IExecutor
-    {
-        string Name { get; }
+    string? Name { get; }
 
-        void Execute(IList<ILexicalToken> tokens, IExecutionContext executionContext);
+    void Execute(ExecutionContext executionContext);
 
-        Task ExecuteAsync(
-            IList<ILexicalToken> tokens,
-            IExecutionContext executionContext,
-            CancellationToken cancellationToken = default);
-    }
+    Task ExecuteAsync(ExecutionContext executionContext, CancellationToken cancellationToken = default);
 }

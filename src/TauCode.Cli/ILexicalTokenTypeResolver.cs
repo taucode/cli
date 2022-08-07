@@ -1,9 +1,6 @@
-﻿using System;
+﻿namespace TauCode.Cli;
 
-namespace TauCode.Cli
+public interface ILexicalTokenTypeResolver
 {
-    public interface ILexicalTokenTypeResolver
-    {
-        Type Resolve(string tokenTypeTag);
-    }
+    Type Resolve(string tokenTypeTag);
 }

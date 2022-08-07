@@ -1,295 +1,136 @@
 ﻿using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using TauCode.Cli.Exceptions;
-using TauCode.Data.Text.TextDataExtractors;
+using TauCode.Cli.ReplCommandProcessors;
 
-namespace TauCode.Cli
+namespace TauCode.Cli;
+
+// todo: disposed app, module, executor and so on cannot 'Run', cannot 'Add', etc.
+
+// todo unused methods
+public class ReplHost : ExecutionContextBuilder, IReplHost
 {
-    public class ReplHost : IReplHost
+    #region Fields
+
+    private readonly Dictionary<string, IApp> _apps;
+
+    private Dictionary<string, ReplCommandProcessor>? _replCommandProcessors;
+
+    #endregion
+
+    #region ctor
+
+    public ReplHost(TextReader input, TextWriter output)
     {
-        #region Fields
+        _apps = new Dictionary<string, IApp>();
 
-        private readonly KeyExtractor _keyExtractor;
-        private readonly TermExtractor _termExtractor;
+        this.Input = input ?? throw new ArgumentNullException(nameof(input));
+        this.Output = output ?? throw new ArgumentNullException(nameof(output));
+    }
 
-        private readonly Dictionary<string, IApp> _apps;
-        private string _prompt;
+    #endregion
 
-        // todo clean
-        //private readonly ILexer _replLexer;
+    #region Private
 
-        #endregion
+    private string FormAppList()
+    {
+        var sb = new StringBuilder();
 
-        #region ctor
-
-        public ReplHost()
+        foreach (var app in this.Apps)
         {
-            _apps = new Dictionary<string, IApp>();
-
-            _keyExtractor = new KeyExtractor(CliHelper.IsCliWhiteSpace);
-            _termExtractor = new TermExtractor(CliHelper.IsCliWhiteSpace);
-
-            //_replLexer = new Lexer();
-
-            //_replLexer.Producers = new ILexicalTokenProducer[]
-            //{
-            //    new WhiteSpaceProducer(),
-            //    new KeyProducer(ReplTerminator),
-            //    new TermProducer(ReplTerminator),
-            //    new ReplArgProducer(ReplTerminator),
-            //};
+            this.WriteApp(app, sb);
         }
 
-        #endregion
+        return sb.ToString();
+    }
 
-        #region Private
-
-        private string FormAppList()
+    private void WriteApp(IApp app, StringBuilder sb)
+    {
+        foreach (var module in app.Modules)
         {
-            var sb = new StringBuilder();
+            this.WriteModule(app, module, sb);
+        }
+    }
 
-            foreach (var app in this.Apps)
-            {
-                this.WriteApp(app, sb);
-            }
+    private void WriteModule(IApp app, IModule module, StringBuilder sb)
+    {
+        foreach (var executor in module.Executors)
+        {
+            this.WriteExecutor(app, module, executor, sb);
+        }
+    }
 
-            return sb.ToString();
+    private void WriteExecutor(IApp app, IModule module, IExecutor executor, StringBuilder sb)
+    {
+        throw new NotImplementedException();
+
+        //if (app.Name != null)
+        //{
+        //    sb.Append(app.Name);
+        //}
+
+        //if (module.Name != null)
+        //{
+        //    if (app.Name != null)
+        //    {
+        //        sb.Append(" ");
+        //    }
+
+        //    sb.Append(module.Name);
+        //}
+
+        //if (executor.Name != null)
+        //{
+        //    if (app.Name != null || module.Name != null)
+        //    {
+        //        sb.Append(" ");
+        //    }
+
+        //    sb.Append(executor.Name);
+        //}
+
+        //sb.AppendLine();
+    }
+
+    #endregion
+
+    #region Protected
+
+    protected virtual string MakePrompt()
+    {
+        var sb = new StringBuilder();
+
+        if (this.CurrentApp is { Name: { } })
+        {
+            sb.Append(this.CurrentApp);
+            sb.Append(" ");
         }
 
-        private void WriteApp(IApp app, StringBuilder sb)
+        if (this.CurrentModule is { Name: { } })
         {
-            foreach (var module in app.Modules)
-            {
-                this.WriteModule(app, module, sb);
-            }
+            sb.Append(this.CurrentModule);
+            sb.Append(" ");
         }
 
-        private void WriteModule(IApp app, IModule module, StringBuilder sb)
+        if (this.CurrentExecutor is { Name: { } })
         {
-            foreach (var executor in module.Executors)
-            {
-                this.WriteExecutor(app, module, executor, sb);
-            }
+            sb.Append(this.CurrentExecutor);
+            sb.Append(" ");
         }
 
-        private void WriteExecutor(IApp app, IModule module, IExecutor executor, StringBuilder sb)
-        {
-            if (app.Name != null)
-            {
-                sb.Append(app.Name);
-            }
+        sb.Append("$ ");
 
-            if (module.Name != null)
-            {
-                if (app.Name != null)
-                {
-                    sb.Append(" ");
-                }
+        return sb.ToString();
+    }
 
-                sb.Append(module.Name);
-            }
+    protected virtual void DisposeImpl()
+    {
+        // idle
+    }
 
-            if (executor.Name != null)
-            {
-                if (app.Name != null || module.Name != null)
-                {
-                    sb.Append(" ");
-                }
-
-                sb.Append(executor.Name);
-            }
-
-            sb.AppendLine();
-        }
-
-        #endregion
-
-        #region Protected
-
-        protected virtual string MakePrompt()
-        {
-            if (_prompt == null)
-            {
-                var sb = new StringBuilder();
-
-                if (this.CurrentApp is { Name: { } })
-                {
-                    sb.Append(this.CurrentApp.Name);
-                    sb.Append(" ");
-                }
-
-                if (this.CurrentModule is { Name: { } })
-                {
-                    sb.Append(this.CurrentModule.Name);
-                    sb.Append(" ");
-
-                    if (this.CurrentModule.CurrentExecutionContext != null)
-                    {
-                        sb.Append("[*] ");
-                    }
-                }
-
-                if (this.CurrentExecutor is { Name: { } })
-                {
-                    sb.Append(this.CurrentExecutor.Name);
-                    sb.Append(" ");
-                }
-
-                sb.Append("$ ");
-
-                _prompt = sb.ToString();
-            }
-
-            return _prompt;
-        }
-
-        protected TextReader GetInput() => this.Input ?? throw new CliException("Output is null.");
-
-        protected TextWriter GetOutput() => this.Output ?? throw new CliException("Output is null.");
-
-        protected static ReadOnlySpan<char> SkipWhiteSpace(ReadOnlySpan<char> input)
-        {
-            var pos = 0;
-            while (pos < input.Length && CliHelper.IsCliWhiteSpace(input, pos))
-            {
-                pos++;
-            }
-
-            var result = input[pos..];
-            return result;
-        }
-
-        protected bool TryProcessReplCommand(ReplContext replContext, out string key)
-        {
-            key = replContext.TryExtractKey();
-
-            if (key == null)
-            {
-                return false;
-            }
-
-            return this.DispatchReplCommand(key, replContext);
-        }
-
-        protected virtual bool DispatchReplCommand(string value, ReplContext replContext)
-        {
-            switch (value)
-            {
-                case "-u":
-                case "--use":
-                    this.Use(replContext);
-                    return true;
-
-                case "-cls":
-                    this.ClearScreen();
-                    return true;
-
-                case "-exit":
-                    this.Exit();
-                    return true;
-
-                case "-c":
-                case "--context":
-                    this.ShowContext();
-                    return true;
-
-                case "-h":
-                case "--help":
-                    this.ShowKeysHelp();
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
-        protected virtual void ShowContext()
-        {
-            if (this.CurrentModule == null)
-            {
-                this.GetOutput().WriteLine("Specify current module to show context (command: -u/--use)");
-            }
-            else if (this.CurrentModule.CurrentExecutionContext == null)
-            {
-                this.GetOutput().WriteLine("Current module has no current execution context.");
-            }
-            else
-            {
-                var description = this.CetContextDescription(this.CurrentModule.CurrentExecutionContext);
-                this.GetOutput().WriteLine(description);
-            }
-        }
-
-        protected virtual string CetContextDescription(IExecutionContext executionContext)
-        {
-            if (executionContext == null)
-            {
-                throw new ArgumentNullException(nameof(executionContext));
-            }
-
-            return executionContext.ToString();
-        }
-
-        protected void Use(ReplContext replContext)
-        {
-            _prompt = null;
-
-            if (replContext.RemainingInput.Length == 0)
-            {
-                this.CurrentApp = null;
-                this.CurrentModule = null;
-                this.CurrentExecutor = null;
-
-                return;
-            }
-
-            this.ResolveReplContext(
-                null,
-                null,
-                null,
-                false,
-                replContext);
-
-            this.CurrentApp = replContext.App;
-            this.CurrentModule = replContext.Module;
-            this.CurrentExecutor = replContext.Executor;
-
-            if (this.CurrentModule != null)
-            {
-                this.CurrentModule.CurrentExecutionContext = replContext.ExecutionContext;
-            }
-        }
-
-        protected virtual void ClearScreen()
-        {
-            if (this.Output == null)
-            {
-                return;
-            }
-
-            if (this.Output == Console.Out)
-            {
-                Console.Clear();
-                return;
-            }
-
-            throw new NotSupportedException($"Cannot clear output of type '{this.Output.GetType().FullName}'.");
-        }
-
-        protected virtual void Exit()
-        {
-            throw new ExitReplException();
-        }
-
-        protected virtual void ShowKeysHelp()
-        {
-            var help = @"
+    protected virtual void ShowKeysHelp()
+    {
+        var help = @"
 -u, --use       : Use specific app/module/executor
 -cls            : Clear screen
 -exit           : Exit application
@@ -298,268 +139,299 @@ namespace TauCode.Cli
 -h, --help      : This help message
 ";
 
-            this.Output?.WriteLine(help);
-        }
+        this.Output?.WriteLine(help);
+    }
 
-        protected void ResolveReplContext(
-            IApp app,
-            IModule module,
-            IExecutor executor,
-            bool moduleAndExecutorMustBeResolved,
-            ReplContext replContext)
+    protected virtual IList<ReplCommandProcessor> CreateCommandProcessors()
+    {
+        return new List<ReplCommandProcessor>
         {
-            do
+            new UseProcessor(this),
+            new EnumerateProcessor(this),
+            new ClearScreenProcessor(this),
+            new ExitProcessor(this),
+        };
+    }
+
+    protected Dictionary<string, ReplCommandProcessor> GetCommandProcessors()
+    {
+        if (_replCommandProcessors == null)
+        {
+            _replCommandProcessors = new Dictionary<string, ReplCommandProcessor>();
+
+            var processors = this.CreateCommandProcessors();
+            foreach (var processor in processors)
             {
-                if (executor == null)
+                foreach (var key in processor.Keys)
                 {
-                    string term;
-                    if (module == null)
-                    {
-                        if (app == null)
-                        {
-                            term = replContext.TryExtractTerm();
-                            if (term == null)
-                            {
-                                throw new CliException($"App name expected'.");
-                            }
-
-                            app = this.GetApp(term);
-                            if (app == null)
-                            {
-                                throw new CliException($"App '{term}' not found.");
-                            }
-                        }
-
-                        // try to get nameless module
-                        module = app.GetModule(null);
-
-                        if (module == null)
-                        {
-                            // try to get named module
-                            term = replContext.TryExtractTerm();
-                            if (term == null)
-                            {
-                                if (moduleAndExecutorMustBeResolved)
-                                {
-                                    throw new CliException($"Module name expected for app '{app.Name}'.");
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-
-                            module = app.GetModule(term);
-                            if (module == null)
-                            {
-                                throw new CliException($"Module '{term}' not found in app '{app.Name}'.");
-                            }
-                        }
-                    }
-
-                    // try to gen nameless executor
-                    executor = module.GetExecutor(null);
-
-                    if (executor == null)
-                    {
-                        // try to get named executor
-                        term = replContext.TryExtractTerm();
-                        if (term == null)
-                        {
-                            if (moduleAndExecutorMustBeResolved)
-                            {
-                                throw new CliException($"Executor name expected for app '{app.Name}', module '{module.Name}'.");
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-
-                        executor = module.GetExecutor(term);
-                        if (executor == null)
-                        {
-                            throw new CliException($"Executor '{term}' not found in app '{app.Name}', module '{module.Name}'.");
-                        }
-                    }
+                    _replCommandProcessors.Add(key, processor);
                 }
-            } while (false);
-
-            replContext.App = app;
-            replContext.Module = module;
-            replContext.Executor = executor;
-            replContext.ExecutionContext = module?.CurrentExecutionContext;
-        }
-
-        #endregion
-
-        #region IReplHost Members
-
-        public IReadOnlyList<IApp> Apps => _apps.Values.ToList();
-
-        public void AddApp(IApp app)
-        {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
-            if (!(app is App))
-            {
-                throw new ArgumentException($"'{app}' must be of type '{typeof(App).FullName}'.");
-            }
-
-            if (_apps.ContainsKey(app.Name))
-            {
-                throw new InvalidOperationException($"App with name '{app.Name}' already added.");
-            }
-
-            _apps.Add(app.Name, app);
-
-            foreach (var module in app.Modules)
-            {
-                module.CurrentExecutionContextChanged += Module_CurrentExecutionContextChanged;
             }
         }
 
-        private void Module_CurrentExecutionContextChanged(IModule module)
+        return _replCommandProcessors;
+    }
+
+    protected virtual bool TryProcessCommand(ReplContext replContext)
+    {
+        var key = replContext.TryExtractKey();
+        if (key == null)
         {
-            _prompt = null;
+            return false;
         }
 
-        public IApp GetApp(string appName)
+        var processor = this.GetCommandProcessors()!.GetValueOrDefault(key);
+        if (processor == null)
         {
-            if (appName == null)
+            replContext.Rewind();
+
+            throw new CliException($"Unknown REPL command: '{key}'");
+        }
+
+        processor.Process(replContext);
+        return true;
+    }
+
+    protected virtual async Task HandleExceptionAsync(Exception ex, CancellationToken cancellationToken)
+    {
+        await this.Output.WriteLineAsync(ex.Message.AsMemory(), cancellationToken);
+    }
+
+    #endregion
+
+    #region Overridden
+
+    public override ExecutionContext BuildFromSelf(ReadOnlyMemory<char> input, bool allowIncomplete)
+    {
+        input = input.SkipCliWhiteSpaces();
+
+        var result = this.TermExtractor.TryExtract(input.Span, out var appName);
+        if (result.ErrorCode.HasValue)
+        {
+            throw new CliException("App name expected");
+        }
+
+        var app = _apps!.GetValueOrDefault(appName);
+        if (app == null)
+        {
+            throw new CliException($"App not found: '{appName}'.");
+        }
+
+        var appInput = input[result.CharsConsumed..].SkipCliWhiteSpaces();
+
+        return this.BuildFromApp(app, appInput, allowIncomplete);
+    }
+
+    public override ILogger? GetLogger() => this.Logger;
+
+    public override TextReader? GetInput() => this.Input;
+
+    public override TextWriter? GetOutput() => this.Output;
+
+    #endregion
+
+    #region IReplHost Members
+
+    public IReadOnlyList<IApp> Apps => _apps.Values.ToList();
+
+    public void AddApp(IApp app)
+    {
+        if (app == null)
+        {
+            throw new ArgumentNullException(nameof(app));
+        }
+
+        if (!(app is App))
+        {
+            throw new ArgumentException($"'{app}' must be of type '{typeof(App).FullName}'.");
+        }
+
+        if (_apps.ContainsKey(app.Name))
+        {
+            throw new InvalidOperationException($"App with name '{app.Name}' already added.");
+        }
+
+        _apps.Add(app.Name, app);
+    }
+
+    public IApp GetApp(string appName)
+    {
+        if (appName == null)
+        {
+            throw new ArgumentNullException(nameof(appName));
+        }
+
+        return _apps.GetValueOrDefault(appName) ?? throw new CliException($"App '{appName}' not found.");
+    }
+
+    public IApp? CurrentApp { get; private set; }
+
+    public IModule? CurrentModule { get; private set; }
+
+    public IExecutor? CurrentExecutor { get; private set; }
+
+    public IReadOnlyList<ReplCommandProcessor> CommandProcessors => this.GetCommandProcessors()
+        .Values
+        .Distinct() // todo: performance?
+        .ToList();
+
+    public ILogger? Logger { get; set; }
+
+    public TextReader? Input { get; set; }
+
+    public TextWriter? Output { get; set; }
+
+    public void Run(string[]? script = null)
+    {
+        throw new NotImplementedException();
+        //while (true)
+        //{
+        //    var prompt = this.MakePrompt();
+        //    this.GetOutput().Write(prompt);
+        //    var input = this.GetInput().ReadLine();
+
+        //    throw new NotImplementedException();
+        //}
+    }
+
+    public async Task RunAsync(
+        string[]? script = null,
+        CancellationToken cancellationToken = default)
+    {
+        var scriptQueue = new Queue<string?>(script ?? Array.Empty<string>());
+        var replContext = new ReplContext(this);
+
+        while (true)
+        {
+            var prompt = this.MakePrompt();
+            await this.Output.WriteAsync(prompt);
+
+            string? input;
+            if (scriptQueue.Count > 0)
             {
-                throw new ArgumentNullException(nameof(appName));
+                input = scriptQueue.Dequeue();
+            }
+            else
+            {
+                input = await this.Input.ReadLineAsync();
             }
 
-            return _apps.GetValueOrDefault(appName) ?? throw new CliException($"App '{appName}' not found.");
-        }
-
-        public IApp CurrentApp { get; private set; }
-
-        public IModule CurrentModule { get; private set; }
-
-        public IExecutor CurrentExecutor { get; private set; }
-
-        public ILogger Logger { get; set; }
-
-        public TextReader Input { get; set; }
-
-        public TextWriter Output { get; set; }
-
-        public void Run()
-        {
-            while (true)
+            if (input == null)
             {
-                var prompt = this.MakePrompt();
-                this.GetOutput().Write(prompt);
-                var input = this.GetInput().ReadLine();
-
-                throw new NotImplementedException();
+                continue;
             }
-        }
 
-        public async Task RunAsync(CancellationToken cancellationToken = default)
-        {
-            var replContext = new ReplContext();
+            replContext.Reset(input);
 
-            // todo clean
-            var todoIdx = 0;
-
-            while (true)
+            try
             {
-                var prompt = this.MakePrompt();
-                await this.GetOutput().WriteAsync(prompt);
-
-                string inputText;
-                if (todoIdx == 0)
-                {
-                    inputText = "tau db connect -c \"Server=.;Database=EZFin.Taxonomies;Trusted_Connection=True;TrustServerCertificate=True\" -p sqlserver";
-                    await this.GetOutput().WriteLineAsync(inputText);
-                    todoIdx++;
-                }
-                else if (todoIdx == 1)
-                {
-                    inputText = "-u tau db query";
-                    await this.GetOutput().WriteLineAsync(inputText);
-                    todoIdx++;
-                }
-                else if (todoIdx == 2)
-                {
-                    inputText = "select * from ez_TaxonomyTypes";
-                    await this.GetOutput().WriteLineAsync(inputText);
-                    todoIdx++;
-                }
-                else
-                {
-                    inputText = await this.GetInput().ReadLineAsync();
-                }
-
-                inputText = inputText?.Trim();
-
-                replContext.Reset(inputText);
-
-                if (string.IsNullOrWhiteSpace(inputText))
+                var processedByRepl = this.TryProcessCommand(replContext);
+                if (processedByRepl)
                 {
                     continue;
                 }
 
-                string key = null;
-                try
+                ExecutionContext executionContext;
+                var app = this.CurrentApp;
+                var module = this.CurrentModule;
+                var executor = this.CurrentExecutor;
+
+                if (executor != null)
                 {
-                    // is it a key?
-                    var replCommandProcessed = this.TryProcessReplCommand(replContext, out key);
-                    if (replCommandProcessed)
-                    {
-                        // nothing else to do.
-                    }
-                    else
-                    {
-                        replContext.ResetPosition();
-
-                        this.ResolveReplContext(
-                            this.CurrentApp,
-                            this.CurrentModule,
-                            this.CurrentExecutor,
-                            true,
-                            replContext);
-
-                        var tokens = replContext.Module.Lexer.Tokenize(replContext.RemainingInput);
-                        var module = replContext.Module;
-                        var executor = replContext.Executor;
-                        var executionContext = replContext.ExecutionContext;
-                        if (executionContext == null)
-                        {
-                            executionContext = module.CreateExecutionContext(
-                                this.Logger,
-                                this.Input,
-                                this.Output);
-                        }
-
-                        await executor.ExecuteAsync(
-                            tokens,
-                            executionContext,
-                            cancellationToken);
-                    }
+                    executionContext = this.BuildFromExecutor(
+                        app ?? throw new CliException("Internal error"), // todo: currenet app must not be null here; 'Internal error' is copy-pasted
+                        module ?? throw new CliException("Internal error"), // todo: currenet app must not be null here; 'Internal error' is copy-pasted,
+                        executor!,
+                        replContext.RemainingInput,
+                        false);
                 }
-                catch (ExitReplException)
+                else if (module != null)
                 {
-                    break;
+                    executionContext = this.BuildFromModule(
+                        app ?? throw new CliException("Internal error"), // todo: currenet app must not be null here; 'Internal error' is copy-pasted
+                        module,
+                        replContext.RemainingInput,
+                        false);
                 }
-                catch (Exception ex)
+                else if (app != null)
                 {
-                    await this.Output.WriteLineAsync(ex.Message);
-
-                    if (key != null)
-                    {
-                        this.ShowKeysHelp();
-                    }
+                    executionContext = this.BuildFromApp(
+                        app,
+                        replContext.RemainingInput,
+                        false);
                 }
+                else
+                {
+                    executionContext = this.BuildFromSelf(replContext.RemainingInput, false);
+                }
+
+                await executionContext.Executor!.ExecuteAsync(executionContext, cancellationToken);
+            }
+            catch (ExitReplException)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                await this.HandleExceptionAsync(ex, cancellationToken);
+            }
+        }
+    }
+
+    public void SetCurrentState(IApp? currentApp, IModule? currentModule, IExecutor? currentExecutor)
+    {
+        if (currentExecutor != null)
+        {
+            if (currentModule == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            if (!currentModule.Contains(currentExecutor))
+            {
+                throw new NotImplementedException();
             }
         }
 
-        #endregion
+        if (currentModule != null)
+        {
+            if (currentApp == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            if (!currentApp.Contains(currentModule))
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        if (currentApp != null)
+        {
+            if (!_apps.ContainsValue(currentApp))
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        this.CurrentApp = currentApp;
+        this.CurrentModule = currentModule;
+        this.CurrentExecutor = currentExecutor;
     }
+
+    #endregion
+
+    #region IDisposable Members
+
+    public void Dispose()
+    {
+        foreach (var app in _apps.Values)
+        {
+            app.Dispose();
+        }
+
+        this.DisposeImpl();
+    }
+
+    #endregion
 }

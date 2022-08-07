@@ -6,12 +6,17 @@ namespace TauCode.Cli.Demo.Git;
 
 public class Program
 {
-    public static void Main(
-        string[] args,
-        double removeToMakeThisMethodAnEntryPoint) => CreateAppHost().Run(args);
+    public static void Main()
+    {
+        var args = CliHelper.GetCommandLineArguments();
+        CreateAppHost().Run(args);
+    }
 
-    public static async Task Main(
-        string[] args) => await CreateAppHost().RunAsync(args);
+    public static async Task MainCanBe()
+    {
+        var args = CliHelper.GetCommandLineArguments();
+        await CreateAppHost().RunAsync(args);
+    }
 
     private static AppHost CreateAppHost()
     {

@@ -1,29 +1,39 @@
 ﻿using Serilog;
-using System.IO;
 
-namespace TauCode.Cli
+namespace TauCode.Cli;
+
+public class ExecutionContext
 {
-    public abstract class ExecutionContextBase : IExecutionContext
+    public ExecutionContext(
+        IApp? app,
+        IModule? module,
+        IExecutor? executor,
+        string? executorName,
+        ReadOnlyMemory<char> arguments,
+        ILogger? logger,
+        TextReader? input,
+        TextWriter? output)
     {
-        protected ExecutionContextBase(
-            ILogger logger,
-            TextReader input,
-            TextWriter output)
-        {
-            this.Logger = logger;
-            this.Input = input;
-            this.Output = output;
-        }
+        this.App = app;
+        this.Module = module;
+        this.Executor = executor;
+        this.ExecutorName = executorName;
 
-        public ILogger Logger { get; }
-        public TextReader Input { get; }
-        public TextWriter Output { get; }
+        this.Arguments = arguments;
 
-        public void Dispose()
-        {
-            this.DisposeImpl();
-        }
-
-        protected abstract void DisposeImpl();
+        this.Logger = logger;
+        this.Input = input;
+        this.Output = output;
     }
+
+    public IApp? App { get; }
+    public IModule? Module { get; }
+    public IExecutor? Executor { get; }
+    public string? ExecutorName { get; }
+
+    public ReadOnlyMemory<char> Arguments { get; }
+
+    public ILogger? Logger { get; }
+    public TextReader? Input { get; }
+    public TextWriter? Output { get; }
 }

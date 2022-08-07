@@ -1,11 +1,10 @@
-﻿namespace TauCode.Cli.Tests.Common.Apps.Curl
+﻿namespace TauCode.Cli.Tests.Common.Apps.Curl;
+
+public class CurlApp : App
 {
-    public class CurlApp : App
+    public CurlApp()
+        : base("curl")
     {
-        public CurlApp()
-            : base("curl")
-        {
-            this.AddModule(new CurlModule());
-        }
+        this.AddModule(new CurlModule());
     }
 }

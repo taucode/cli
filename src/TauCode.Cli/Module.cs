@@ -1,6 +1,5 @@
 ﻿using TauCode.Cli.Executors;
 
-// todo clean
 namespace TauCode.Cli;
 
 public abstract class Module : IModule
@@ -32,6 +31,21 @@ public abstract class Module : IModule
 
     #endregion
 
+    #region Protected
+
+    protected virtual void DisposeImpl()
+    {
+        // idle
+    }
+
+    #endregion
+
+    #region Overridde
+
+    public override string? ToString() => this.Name;
+
+    #endregion
+
     #region IModule Members
 
     public string? Name { get; }
@@ -44,6 +58,11 @@ public abstract class Module : IModule
             if (_namelessExecutor != null)
             {
                 list.Add(_namelessExecutor);
+            }
+
+            if (_fallbackExecutor != null)
+            {
+                list.Add(_fallbackExecutor);
             }
 
             return list;
@@ -134,9 +153,21 @@ public abstract class Module : IModule
 
     #endregion
 
-    #region Overridde
+    #region IDisposable Members
 
-    public override string? ToString() => this.Name;
+    public void Dispose()
+    {
+        _namelessExecutor?.Dispose();
+
+        foreach (var executor in _executors.Values)
+        {
+            executor.Dispose();
+        }
+
+        _fallbackExecutor?.Dispose();
+
+        this.DisposeImpl();
+    }
 
     #endregion
 }

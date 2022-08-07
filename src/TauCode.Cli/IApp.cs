@@ -1,6 +1,6 @@
 ﻿namespace TauCode.Cli;
 
-public interface IApp
+public interface IApp : IDisposable
 {
     string Name { get; }
 

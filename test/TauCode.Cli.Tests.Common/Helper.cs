@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System.IO;
-using System.Linq;
 using TauCode.Extensions;
 
 namespace TauCode.Cli.Tests.Common;
 
+// todo clean
 public static class Helper
 {
     //private static readonly CliGraphScriptReader ScriptReader =
@@ -31,34 +31,35 @@ public static class Helper
             new CliVertexFactory(
                 new CliTokenTypeResolver())));
 
-    public static CommandDto ToDto(this Command command)
+    //public static TestCommandDto ToDto(this Command command)
+    //{
+    //    return new TestCommandDto
+    //    {
+    //        ExecutorName = command.ExecutorName,
+
+    //        Arguments = command.Arguments
+    //            .ToDictionary(
+    //                x => x.Key,
+    //                y => y.Value
+    //                    .Select(x => x.ToString())
+    //                    .ToList()),
+
+    //        KeyValues = command.KeyValues
+    //            .ToDictionary(
+    //                x => x.Key,
+    //                y => y.Value
+    //                    .Select(x => x.ToString())
+    //                    .ToList()),
+
+    //        Switches = command.Switches
+    //            .ToList(),
+    //    };
+    //}
+
+    internal static void Dump(TestCommand command, TextWriter output)
     {
-        return new CommandDto
-        {
-            ExecutorName = command.ExecutorName,
-
-            Arguments = command.Arguments
-                .ToDictionary(
-                    x => x.Key,
-                    y => y.Value
-                        .Select(x => x.ToString())
-                        .ToList()),
-
-            KeyValues = command.KeyValues
-                .ToDictionary(
-                    x => x.Key,
-                    y => y.Value
-                        .Select(x => x.ToString())
-                        .ToList()),
-
-            Switches = command.Switches
-                .ToList(),
-        };
-    }
-
-    internal static void Dump(Command command, TextWriter output)
-    {
-        var json = JsonConvert.SerializeObject(command, Formatting.Indented);
+        var commandDto = command.ToDto();
+        var json = JsonConvert.SerializeObject(commandDto, Formatting.Indented);
         output.WriteLine(json);
     }
 

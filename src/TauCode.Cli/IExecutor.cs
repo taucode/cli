@@ -1,6 +1,6 @@
 ﻿namespace TauCode.Cli;
 
-public interface IExecutor
+public interface IExecutor : IDisposable
 {
     string? Name { get; }
 

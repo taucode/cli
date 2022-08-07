@@ -1,9 +1,8 @@
 ﻿using NUnit.Framework;
 
-namespace TauCode.Cli.Tests.AppHost
+namespace TauCode.Cli.Tests.AppHost;
+
+[TestFixture]
+public class GitAppHostTests
 {
-    [TestFixture]
-    public class GitAppHostTests
-    {
-    }
 }

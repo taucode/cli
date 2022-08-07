@@ -6,41 +6,12 @@ using TauCode.Parsing.TokenProducers;
 
 namespace TauCode.Cli.Tests.Common.Apps.Git;
 
-// todo clean
 public static class GitHelper
 {
-    //private static readonly CliGraphScriptReader ScriptReader =
-    //    new CliGraphScriptReader(new CliVertexFactory(new GitTokenTypeResolver()));
-
-    //private static readonly GitTokenConverter TokenConverter = new GitTokenConverter();
-
-    private static readonly CliGraphParser GraphParser = new CliGraphParser(
+    private static readonly CliGraphParser GraphParser = new(
         new CliGraphScriptReader(),
         new CliGraphBuilder(
             new CliVertexFactory(new GitTokenTypeResolver())));
-
-    //public static IGraph BuildParsingGraph(string resourceName)
-    //{
-    //    var script = typeof(Helper).Assembly.GetResourceText(resourceName, true);
-    //    var graph = ScriptReader.BuildGraph(script);
-
-    //    var nodesWhichCanConvertTokens = graph
-    //        .Where(x => !x.GetType().IsIn(typeof(IdleNode), typeof(EndNode)))
-    //        .Cast<IParsingNode>()
-    //        .ToList();
-
-    //    nodesWhichCanConvertTokens.ForEach(x => x.TokenConverter = TokenConverter);
-
-    //    return graph;
-    //}
-
-    //internal static IParsingNode BuildParsingNode(string resourceName)
-    //{
-    //    var graph = BuildParsingGraph(resourceName);
-    //    var node = ScriptReader.ResolveParsingNode(graph);
-
-    //    return node;
-    //}
 
     public static bool IsValidBranchName(string text)
     {

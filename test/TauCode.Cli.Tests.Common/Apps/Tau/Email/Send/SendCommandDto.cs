@@ -2,7 +2,7 @@
 
 namespace TauCode.Cli.Tests.Common.Apps.Tau.Email.Send;
 
-public class SendCommandDto : CommandDto
+public class SendCommandDto : TestCommandDto
 {
     public class AttachmentInfoDto
     {

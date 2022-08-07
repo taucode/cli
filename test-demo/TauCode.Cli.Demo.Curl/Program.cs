@@ -1,19 +1,22 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using TauCode.Cli.Tests.Common.Apps.Curl;
-using TauCode.Cli.Tests.Common.Apps.Git;
 
 namespace TauCode.Cli.Demo.Curl;
 
 public class Program
 {
-    public static void Main(
-        string[] args) => CreateAppHost().Run(args);
+    public static void Main()
+    {
+        var args = CliHelper.GetCommandLineArguments();
+        CreateAppHost().Run(args);
+    }
 
-    public static async Task Main(
-        string[] args,
-        double removeToMakeThisMethodAnEntryPoint) => await CreateAppHost().RunAsync(args);
+    public static async Task MainCanBe()
+    {
+        var args = CliHelper.GetCommandLineArguments();
+        await CreateAppHost().RunAsync(args);
+    }
 
     private static AppHost CreateAppHost()
     {

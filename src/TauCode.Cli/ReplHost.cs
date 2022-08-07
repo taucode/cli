@@ -1,23 +1,20 @@
-﻿using System.Text;
+﻿using Serilog;
+using System.Text;
 using TauCode.Cli.Exceptions;
 using TauCode.Cli.ReplCommandProcessors;
 
-// todo clean
 namespace TauCode.Cli;
 
+// todo: disposed app, module, executor and so on cannot 'Run', cannot 'Add', etc.
+
+// todo unused methods
 public class ReplHost : ExecutionContextBuilder, IReplHost
 {
     #region Fields
 
-    //private readonly KeyExtractor _keyExtractor;
-    //private readonly TermExtractor _termExtractor;
-
     private readonly Dictionary<string, IApp> _apps;
 
     private Dictionary<string, ReplCommandProcessor>? _replCommandProcessors;
-
-    // todo clean
-    //private readonly ILexer _replLexer;
 
     #endregion
 
@@ -26,9 +23,6 @@ public class ReplHost : ExecutionContextBuilder, IReplHost
     public ReplHost(TextReader input, TextWriter output)
     {
         _apps = new Dictionary<string, IApp>();
-
-        //_keyExtractor = new KeyExtractor(CliHelper.IsCliWhiteSpace);
-        //_termExtractor = new TermExtractor(CliHelper.IsCliWhiteSpace);
 
         this.Input = input ?? throw new ArgumentNullException(nameof(input));
         this.Output = output ?? throw new ArgumentNullException(nameof(output));
@@ -129,128 +123,10 @@ public class ReplHost : ExecutionContextBuilder, IReplHost
         return sb.ToString();
     }
 
-    //protected TextReader GetInput() => this.Input ?? throw new CliException("Output is null.");
-
-    //protected TextWriter GetOutput() => this.Output ?? throw new CliException("Output is null.");
-
-    protected static ReadOnlySpan<char> SkipWhiteSpace(ReadOnlySpan<char> input)
+    protected virtual void DisposeImpl()
     {
-        var pos = 0;
-        while (pos < input.Length && CliHelper.IsCliWhiteSpace(input, pos))
-        {
-            pos++;
-        }
-
-        var result = input[pos..];
-        return result;
+        // idle
     }
-
-    //protected bool TryProcessReplCommand(ReplContext replContext, out string key)
-    //{
-    //    key = replContext.TryExtractKey();
-
-    //    if (key == null)
-    //    {
-    //        return false;
-    //    }
-
-    //    return this.DispatchReplCommand(key, replContext);
-    //}
-
-    //protected virtual bool DispatchReplCommand(string value, ReplContext replContext)
-    //{
-    //    switch (value)
-    //    {
-    //        case "-u":
-    //        case "--use":
-    //            this.Use(replContext);
-    //            return true;
-
-    //        case "-cls":
-    //            this.ClearScreen();
-    //            return true;
-
-    //        case "-exit":
-    //            this.Exit();
-    //            return true;
-
-    //        case "-c":
-    //        case "--context":
-    //            this.ShowContext();
-    //            return true;
-
-    //        case "-h":
-    //        case "--help":
-    //            this.ShowKeysHelp();
-    //            return true;
-
-    //        default:
-    //            return false;
-    //    }
-    //}
-
-    protected virtual void ShowContext()
-    {
-        throw new NotImplementedException();
-
-        //if (this.CurrentModule == null)
-        //{
-        //    this.Output.WriteLine("Specify current module to show context (command: -u/--use)");
-        //}
-        //else if (this.CurrentModule.CurrentExecutionContext == null)
-        //{
-        //    this.GetOutput().WriteLine("Current module has no current execution context.");
-        //}
-        //else
-        //{
-        //    var description = this.CetContextDescription(this.CurrentModule.CurrentExecutionContext);
-        //    this.GetOutput().WriteLine(description);
-        //}
-    }
-
-    //protected virtual string CetContextDescription(IExecutionContext executionContext)
-    //{
-    //    if (executionContext == null)
-    //    {
-    //        throw new ArgumentNullException(nameof(executionContext));
-    //    }
-
-    //    return executionContext.ToString();
-    //}
-
-    //protected void Use(ReplContext replContext)
-    //{
-    //    throw new NotImplementedException();
-    //    //_prompt = null;
-
-    //    //if (replContext.RemainingInput.Length == 0)
-    //    //{
-    //    //    this.CurrentApp = null;
-    //    //    this.CurrentModule = null;
-    //    //    this.CurrentExecutor = null;
-
-    //    //    return;
-    //    //}
-
-    //    //this.ResolveReplContext(
-    //    //    null,
-    //    //    null,
-    //    //    null,
-    //    //    false,
-    //    //    replContext);
-
-    //    //this.CurrentApp = replContext.SelectedApp;
-    //    //this.CurrentModule = replContext.SelectedModule;
-    //    //this.CurrentExecutor = replContext.SelectedExecutor;
-
-    //    //if (this.CurrentModule != null)
-    //    //{
-    //    //    this.CurrentModule.CurrentExecutionContext = replContext.ExecutionContext;
-    //    //}
-    //}
-
-
-
 
     protected virtual void ShowKeysHelp()
     {
@@ -265,98 +141,6 @@ public class ReplHost : ExecutionContextBuilder, IReplHost
 
         this.Output?.WriteLine(help);
     }
-
-    //protected void ResolveReplContext(
-    //    IApp app,
-    //    IModule module,
-    //    IExecutor executor,
-    //    bool moduleAndExecutorMustBeResolved,
-    //    ReplContext replContext)
-    //{
-    //    throw new NotImplementedException();
-
-    //    //do
-    //    //{
-    //    //    if (executor == null)
-    //    //    {
-    //    //        string term;
-    //    //        if (module == null)
-    //    //        {
-    //    //            if (app == null)
-    //    //            {
-    //    //                term = replContext.TryExtractTerm();
-    //    //                if (term == null)
-    //    //                {
-    //    //                    throw new CliException($"App name expected'.");
-    //    //                }
-
-    //    //                app = this.GetApp(term);
-    //    //                if (app == null)
-    //    //                {
-    //    //                    throw new CliException($"App '{term}' not found.");
-    //    //                }
-    //    //            }
-
-    //    //            // try to get nameless module
-    //    //            module = app.GetModule(null);
-
-    //    //            if (module == null)
-    //    //            {
-    //    //                // try to get named module
-    //    //                term = replContext.TryExtractTerm();
-    //    //                if (term == null)
-    //    //                {
-    //    //                    if (moduleAndExecutorMustBeResolved)
-    //    //                    {
-    //    //                        throw new CliException($"Module name expected for app '{app.Name}'.");
-    //    //                    }
-    //    //                    else
-    //    //                    {
-    //    //                        break;
-    //    //                    }
-    //    //                }
-
-    //    //                module = app.GetModule(term);
-    //    //                if (module == null)
-    //    //                {
-    //    //                    throw new CliException($"Module '{term}' not found in app '{app.Name}'.");
-    //    //                }
-    //    //            }
-    //    //        }
-
-    //    //        // try to gen nameless executor
-    //    //        executor = module.GetExecutor(null);
-
-    //    //        if (executor == null)
-    //    //        {
-    //    //            // try to get named executor
-    //    //            term = replContext.TryExtractTerm();
-    //    //            if (term == null)
-    //    //            {
-    //    //                if (moduleAndExecutorMustBeResolved)
-    //    //                {
-    //    //                    throw new CliException($"Executor name expected for app '{app.Name}', module '{module.Name}'.");
-    //    //                }
-    //    //                else
-    //    //                {
-    //    //                    break;
-    //    //                }
-    //    //            }
-
-    //    //            executor = module.GetExecutor(term);
-    //    //            if (executor == null)
-    //    //            {
-    //    //                throw new CliException($"Executor '{term}' not found in app '{app.Name}', module '{module.Name}'.");
-    //    //            }
-    //    //        }
-    //    //    }
-    //    //} while (false);
-
-    //    //replContext.SelectedApp = app;
-    //    //replContext.SelectedModule = module;
-    //    //replContext.SelectedExecutor = executor;
-    //    //replContext.ExecutionContext = module?.CurrentExecutionContext;
-    //}
 
     protected virtual IList<ReplCommandProcessor> CreateCommandProcessors()
     {
@@ -438,6 +222,12 @@ public class ReplHost : ExecutionContextBuilder, IReplHost
         return this.BuildFromApp(app, appInput, allowIncomplete);
     }
 
+    public override ILogger? GetLogger() => this.Logger;
+
+    public override TextReader? GetInput() => this.Input;
+
+    public override TextWriter? GetOutput() => this.Output;
+
     #endregion
 
     #region IReplHost Members
@@ -462,11 +252,6 @@ public class ReplHost : ExecutionContextBuilder, IReplHost
         }
 
         _apps.Add(app.Name, app);
-
-        //foreach (var module in app.Modules)
-        //{
-        //    module.CurrentExecutionContextChanged += Module_CurrentExecutionContextChanged;
-        //}
     }
 
     public IApp GetApp(string appName)
@@ -489,6 +274,12 @@ public class ReplHost : ExecutionContextBuilder, IReplHost
         .Values
         .Distinct() // todo: performance?
         .ToList();
+
+    public ILogger? Logger { get; set; }
+
+    public TextReader? Input { get; set; }
+
+    public TextWriter? Output { get; set; }
 
     public void Run(string[]? script = null)
     {
@@ -626,6 +417,20 @@ public class ReplHost : ExecutionContextBuilder, IReplHost
         this.CurrentApp = currentApp;
         this.CurrentModule = currentModule;
         this.CurrentExecutor = currentExecutor;
+    }
+
+    #endregion
+
+    #region IDisposable Members
+
+    public void Dispose()
+    {
+        foreach (var app in _apps.Values)
+        {
+            app.Dispose();
+        }
+
+        this.DisposeImpl();
     }
 
     #endregion

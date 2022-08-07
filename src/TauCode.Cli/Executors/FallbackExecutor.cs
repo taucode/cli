@@ -14,4 +14,9 @@ public abstract class FallbackExecutor : IExecutor
     {
         return this.Name;
     }
+
+    public virtual void Dispose()
+    {
+        // idle
+    }
 }

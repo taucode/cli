@@ -53,4 +53,4 @@ x   1. Get rid of ReadOnlyMemory<char>.
 
 2022-07-29
 ==========
-    1. Executor might want its own Lexer. E.g. ComSpec emulation
++   1. Executor might want its own Lexer. E.g. ComSpec emulation

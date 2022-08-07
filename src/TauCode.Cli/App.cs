@@ -29,6 +29,21 @@ public class App : IApp
 
     #endregion
 
+    #region Overridden
+
+    public override string ToString() => this.Name;
+
+    #endregion
+
+    #region Protected
+
+    protected virtual void DisposeImpl()
+    {
+        // idle
+    }
+
+    #endregion
+
     #region IApp Members
 
     public string Name { get; }
@@ -121,9 +136,19 @@ public class App : IApp
 
     #endregion
 
-    #region Overridden
+    #region IDisposable
 
-    public override string? ToString() => this.Name;
+    public void Dispose()
+    {
+        _namelessModule?.Dispose();
+
+        foreach (var module in _modules.Values)
+        {
+            module.Dispose();
+        }
+
+        this.DisposeImpl();
+    }
 
     #endregion
 }

@@ -9,8 +9,7 @@ public class ExecutionContext
         IModule? module,
         IExecutor? executor,
         string? executorName,
-        ReadOnlyMemory<char>? rawArguments,
-        string[]? arguments,
+        ReadOnlyMemory<char> arguments,
         ILogger? logger,
         TextReader? input,
         TextWriter? output)
@@ -20,15 +19,6 @@ public class ExecutionContext
         this.Executor = executor;
         this.ExecutorName = executorName;
 
-        var onlyOne = rawArguments == null ^ arguments == null;
-        if (!onlyOne)
-        {
-            throw new ArgumentException(
-                $"Either '{nameof(rawArguments)}' or '{nameof(arguments)}' must be non-null.",
-                $"{nameof(rawArguments)}/{nameof(arguments)}");
-        }
-
-        this.RawArguments = rawArguments;
         this.Arguments = arguments;
 
         this.Logger = logger;
@@ -41,10 +31,9 @@ public class ExecutionContext
     public IExecutor? Executor { get; }
     public string? ExecutorName { get; }
 
-    public ReadOnlyMemory<char>? RawArguments { get; }
-    public string[]? Arguments { get; }
+    public ReadOnlyMemory<char> Arguments { get; }
 
-    public ILogger? Logger { get; set; }
-    public TextReader? Input { get; set; }
-    public TextWriter? Output { get; set; }
+    public ILogger? Logger { get; }
+    public TextReader? Input { get; }
+    public TextWriter? Output { get; }
 }

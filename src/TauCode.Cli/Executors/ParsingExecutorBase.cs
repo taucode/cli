@@ -1,5 +1,4 @@
-﻿using TauCode.Cli.Exceptions;
-using TauCode.Data.Graphs;
+﻿using TauCode.Data.Graphs;
 using TauCode.Data.Text.TextDataExtractors;
 using TauCode.Parsing;
 
@@ -58,11 +57,27 @@ public abstract class ParsingExecutorBase : IExecutor
 
     protected IParser Parser { get; }
 
-    protected virtual Command CreateCommand(string? executorName) => new(executorName);
+    protected virtual Command CreateCommand(string? executorName, ReadOnlyMemory<char> input) => new(executorName, input);
+
+    protected Command ParseCommand(ExecutionContext executionContext)
+    {
+        var tokens = this.Lexer.Tokenize(executionContext.Arguments);
+
+        this.Parser.Logger = executionContext.Logger;
+        var command = this.CreateCommand(this.Name, executionContext.Arguments);
+
+        this.Parser.Parse(tokens, command);
+
+        return command;
+    }
 
     #endregion
 
     #region Abstract
+
+    protected abstract void ExecuteImpl(
+        Command command,
+        ExecutionContext executionContext);
 
     protected abstract Task ExecuteImplAsync(
         Command command,
@@ -81,38 +96,31 @@ public abstract class ParsingExecutorBase : IExecutor
 
     public string? Name { get; }
 
-    public void Execute(
-        ExecutionContext executionContext)
+    public void Execute(ExecutionContext executionContext)
     {
-        throw new NotImplementedException();
+        var command = this.ParseCommand(executionContext);
+        this.OnBeforeCommandExecuted?.Invoke(command, executionContext);
+
+        this.ExecuteImpl(command, executionContext);
     }
 
     public async Task ExecuteAsync(
         ExecutionContext executionContext,
         CancellationToken cancellationToken = default)
     {
-        IList<ILexicalToken> tokens;
-
-        if (executionContext.RawArguments.HasValue)
-        {
-            tokens = this.Lexer.Tokenize(executionContext.RawArguments.Value);
-        }
-        else if (executionContext.Arguments != null)
-        {
-            tokens = this.Lexer.Tokenize(executionContext.Arguments);
-        }
-        else
-        {
-            throw new CliException("Either RawArguments or Arguments must have value.");
-        }
-
-        this.Parser.Logger = executionContext.Logger;
-        var command = this.CreateCommand(this.Name);
-
-        this.Parser.Parse(tokens, command);
-
+        var command = this.ParseCommand(executionContext);
         this.OnBeforeCommandExecuted?.Invoke(command, executionContext);
+
         await this.ExecuteImplAsync(command, executionContext, cancellationToken);
+    }
+
+    #endregion
+
+    #region IDisposable Members
+
+    public virtual void Dispose()
+    {
+        // idle
     }
 
     #endregion

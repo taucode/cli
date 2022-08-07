@@ -1,6 +1,6 @@
 ﻿namespace TauCode.Cli;
 
-public interface IModule
+public interface IModule : IDisposable
 {
     string? Name { get; }
 

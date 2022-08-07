@@ -5,7 +5,6 @@ using TauCode.Parsing.TinyLisp.Data;
 
 namespace TauCode.Cli;
 
-// todo clean
 public class CliGraphScriptReader : GraphScriptReader
 {
     #region Fields
@@ -18,13 +17,11 @@ public class CliGraphScriptReader : GraphScriptReader
     private readonly OptionalElementReader _optionalElementReader;
     private readonly AlternativesElementReader _alternativesGroupReader;
 
-    //private readonly IGraphBuilder _graphBuilder;
-
     #endregion
 
     #region ctor
 
-    public CliGraphScriptReader(/*IVertexFactory vertexFactory*/)
+    public CliGraphScriptReader()
     {
         _executorElementReader = new ExecutorElementReader(this);
         _repeatableElementReader = new RepeatableElementReader(this);
@@ -33,8 +30,6 @@ public class CliGraphScriptReader : GraphScriptReader
         _vertexElementReader = new VertexReader(this);
         _optionalElementReader = new OptionalElementReader(this);
         _alternativesGroupReader = new AlternativesElementReader(this);
-
-        //_graphBuilder = new GraphBuilder(vertexFactory);
     }
 
     #endregion
@@ -67,7 +62,6 @@ public class CliGraphScriptReader : GraphScriptReader
                 case "FALLBACK":
                 case "BOOLEAN":
                 case "CUSTOM-KEY":
-                case "ANY":
                     return _vertexElementReader;
 
                 case "OPTIONAL":
@@ -82,33 +76,4 @@ public class CliGraphScriptReader : GraphScriptReader
     }
 
     #endregion
-
-
-
-
-
-    //public IGraph BuildGraph(string script)
-    //{
-    //    // todo checks
-
-    //    var groupMold = this.ReadScript(script.AsMemory());
-    //    var graph = _graphBuilder.Build(groupMold);
-
-    //    return graph;
-
-    //}
-
-    //public IParsingNode ResolveParsingNode(IGraph graph)
-    //{
-    //    var node = (IParsingNode)graph.Single(x => x.Name == "parsi-ng-top");
-    //    return node;
-    //}
-
-    //public IParsingNode BuildNode(string script)
-    //{
-    //    // todo checks
-    //    var graph = this.BuildGraph(script);
-    //    var node = this.ResolveParsingNode(graph);
-    //    return node;
-    //}
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using TauCode.Cli.Nodes;
 using TauCode.Parsing;
 using TauCode.Parsing.Nodes;
@@ -81,7 +82,8 @@ public class SendExecutor : TestExecutorBase
         parsingResult.IncreaseVersion();
     }
 
-    //protected override Command CreateCommand() => new SendCommand(this.Name);
+    protected override Command CreateCommand(string? executorName, ReadOnlyMemory<char> input) =>
+        new SendCommand(executorName, input);
 
     //protected override void ExecuteImpl(Command command, IExecutionContext executionContext)
     //{

@@ -1,9 +1,13 @@
 ﻿using Microsoft.Data.SqlClient;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
 using TauCode.Db;
+using TauCode.Db.Npgsql;
 using TauCode.Db.SqlClient;
+using TauCode.Db.SQLite;
 using TauCode.Extensions;
 using TauCode.Parsing;
 using TauCode.Parsing.TokenProducers;
@@ -12,36 +16,17 @@ namespace TauCode.Cli.Tests.Common.Apps.Tau.Db;
 
 public static class DbHelper
 {
-    //private static readonly CliGraphScriptReader ScriptReader =
-    //    new CliGraphScriptReader(new DbVertexFactory());
-
-    private static readonly CliGraphParser GraphParser = new CliGraphParser(
+    private static readonly CliGraphParser GraphParser = new(
         new CliGraphScriptReader(),
         new CliGraphBuilder(
             new CliVertexFactory(new DbTokenTypeResolver())));
 
-    private static readonly HashSet<char> PunctuationChars = new HashSet<char>(new[]
+    private static readonly HashSet<char> PunctuationChars = new(new[]
     {
         ',',
         '*',
         ';',
     });
-
-    //public static IGraph BuildParsingGraph(string resourceName)
-    //{
-    //    var script = typeof(Helper).Assembly.GetResourceText(resourceName, true);
-    //    var graph = ScriptReader.BuildGraph(script);
-
-    //    return graph;
-    //}
-
-    //public static IParsingNode BuildParsingNode(string resourceName)
-    //{
-    //    var graph = BuildParsingGraph(resourceName);
-    //    var node = ScriptReader.ResolveParsingNode(graph);
-
-    //    return node;
-    //}
 
     public static ILexer Lexer = new Lexer
     {
@@ -107,14 +92,14 @@ public static class DbHelper
         {
             return SqlUtilityFactory.Instance;
         }
-        //else if (connection is SQLiteConnection)
-        //{
-        //    return SQLiteUtilityFactory.Instance;
-        //}
-        //else if (connection is NpgsqlConnection)
-        //{
-        //    return NpgsqlUtilityFactory.Instance;
-        //}
+        else if (connection is SQLiteConnection)
+        {
+            return SQLiteUtilityFactory.Instance;
+        }
+        else if (connection is NpgsqlConnection)
+        {
+            return NpgsqlUtilityFactory.Instance;
+        }
 
         throw new ArgumentException($"Not supported connection: '{connection.GetType().FullName}'.", nameof(connection));
     }

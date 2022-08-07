@@ -32,7 +32,7 @@ namespace TauCode.Cli.ReplCommandProcessors
 
                 var context = this.Host.BuildFromSelf(replContext.RemainingInput, true);
 
-                if (!context.RawArguments!.Value.IsEmpty)
+                if (!context.Arguments.IsEmpty)
                 {
                     throw new CliException("Executor arguments are not applicable here.");
                 }

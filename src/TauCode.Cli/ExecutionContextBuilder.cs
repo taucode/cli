@@ -15,7 +15,7 @@ public abstract class ExecutionContextBuilder : IExecutionContextBuilder
 
     #region ctor
 
-    public ExecutionContextBuilder()
+    protected ExecutionContextBuilder()
     {
         TermExtractor = new TermExtractor(CliHelper.IsCliWhiteSpace);
     }
@@ -23,32 +23,6 @@ public abstract class ExecutionContextBuilder : IExecutionContextBuilder
     #endregion
 
     #region IExecutionContextBuilder Members
-
-    //public ExecutionContext BuildFromSelf(IReadOnlyDictionary<string, IApp> apps, ReadOnlyMemory<char> input)
-    //{
-    //    if (apps == null)
-    //    {
-    //        throw new ArgumentNullException(nameof(apps));
-    //    }
-
-    //    input = input.SkipCliWhiteSpaces();
-
-    //    var result = _termExtractor.TryExtract(input.Span, out var appName);
-    //    if (result.ErrorCode.HasValue)
-    //    {
-    //        throw new CliException("App name expected");
-    //    }
-
-    //    var app = apps!.GetValueOrDefault(appName);
-    //    if (app == null)
-    //    {
-    //        throw new CliException($"App not found: '{appName}'.");
-    //    }
-
-    //    var appInput = input[result.CharsConsumed..].SkipCliWhiteSpaces();
-
-    //    return this.BuildFromApp(app, appInput);
-    //}
 
     public abstract ExecutionContext BuildFromSelf(
         ReadOnlyMemory<char> input,
@@ -76,10 +50,9 @@ public abstract class ExecutionContextBuilder : IExecutionContextBuilder
                     null,
                     null,
                     appInput,
-                    null,
-                    this.Logger,
-                    this.Input,
-                    this.Output);
+                    this.GetLogger(),
+                    this.GetInput(),
+                    this.GetOutput());
             }
             else
             {
@@ -89,39 +62,37 @@ public abstract class ExecutionContextBuilder : IExecutionContextBuilder
 
         // try get nameless module
         var module = app.GetModule(null);
-        if (module != null)
-        {
-            throw new NotImplementedException();
-        }
+        ReadOnlyMemory<char> moduleInput;
 
-        // try extract module name
-        var result = TermExtractor.TryExtract(appInput.Span, out var moduleName);
-        if (result.ErrorCode.HasValue)
-        {
-            throw new CliException("Module name expected");
-        }
-
-        module = app.GetModule(moduleName);
         if (module == null)
         {
-            throw new CliException($"Module not found: '{moduleName}'. App is '{app.Name}'.");
-        }
+            // there is no nameless module
 
-        var moduleInput = appInput[result.CharsConsumed..].SkipCliWhiteSpaces();
+            // try extract module name
+            var result = TermExtractor.TryExtract(appInput.Span, out var moduleName);
+            if (result.ErrorCode.HasValue)
+            {
+                throw new CliException("Module name expected.");
+            }
+
+            module = app.GetModule(moduleName);
+            if (module == null)
+            {
+                throw new CliException($"Module not found: '{moduleName}'. App is '{app.Name}'.");
+            }
+
+            moduleInput = appInput[result.CharsConsumed..].SkipCliWhiteSpaces();
+        }
+        else
+        {
+            moduleInput = appInput;
+        }
 
         return this.BuildFromModule(
             app,
             module,
             moduleInput,
             allowIncomplete);
-    }
-
-    public ExecutionContext BuildFromApp(
-        IApp app,
-        string[] appArgs,
-        bool allowIncomplete)
-    {
-        throw new NotImplementedException();
     }
 
     public ExecutionContext BuildFromModule(
@@ -142,7 +113,7 @@ public abstract class ExecutionContextBuilder : IExecutionContextBuilder
 
         if (!app.Contains(module))
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("error");
         }
 
         moduleInput = moduleInput.SkipCliWhiteSpaces();
@@ -157,47 +128,50 @@ public abstract class ExecutionContextBuilder : IExecutionContextBuilder
                     null,
                     null,
                     moduleInput,
-                    null,
-                    this.Logger,
-                    this.Input,
-                    this.Output);
+                    this.GetLogger(),
+                    this.GetInput(),
+                    this.GetOutput());
             }
             else
             {
-                throw new NotImplementedException();
+                throw new NotImplementedException("error");
             }
         }
 
         // try get nameless executor
         var executor = module.GetExecutor(null);
-        if (executor != null)
-        {
-            throw new NotImplementedException("todo");
-        }
+        ReadOnlyMemory<char> executorInput;
 
-        // try extract executor name
-        var result = TermExtractor.TryExtract(moduleInput.Span, out var executorName);
-        if (result.ErrorCode.HasValue)
-        {
-            throw new CliException("Executor name expected");
-        }
-
-        executor = module.GetExecutor(executorName);
         if (executor == null)
         {
-            // todo: deal with fallback executor
+            // try extract executor name
+            var result = TermExtractor.TryExtract(moduleInput.Span, out var executorName);
+            if (result.ErrorCode.HasValue)
+            {
+                throw new CliException("Executor name expected");
+            }
 
-            var moduleName = module.Name ?? module.GetType().FullName;
+            executor = module.GetExecutor(executorName);
+            if (executor == null)
+            {
+                // todo: deal with fallback executor
 
-            throw new CliException($"Executor not found: '{executorName}'. Module is '{moduleName}'. App is '{app.Name}'.");
+                var moduleName = module.Name ?? module.GetType().FullName;
+
+                throw new CliException($"Executor not found: '{executorName}'. Module is '{moduleName}'. App is '{app.Name}'.");
+            }
+
+            if (executor is FallbackExecutor fallbackExecutor)
+            {
+                fallbackExecutor.Name = executorName!;
+            }
+
+            executorInput = moduleInput[result.CharsConsumed..].SkipCliWhiteSpaces();
         }
-
-        if (executor is FallbackExecutor fallbackExecutor)
+        else
         {
-            fallbackExecutor.Name = executorName!;
+            executorInput = moduleInput;
         }
-
-        var executorInput = moduleInput[result.CharsConsumed..].SkipCliWhiteSpaces();
 
         return this.BuildFromExecutor(
             app,
@@ -205,15 +179,6 @@ public abstract class ExecutionContextBuilder : IExecutionContextBuilder
             executor,
             executorInput,
             allowIncomplete);
-    }
-
-    public ExecutionContext BuildFromModule(
-        IApp app,
-        IModule module,
-        string[] moduleArgs,
-        bool allowIncomplete)
-    {
-        throw new NotImplementedException();
     }
 
     public ExecutionContext BuildFromExecutor(
@@ -254,25 +219,16 @@ public abstract class ExecutionContextBuilder : IExecutionContextBuilder
             executor,
             executor.Name,
             executorInput,
-            null,
-            this.Logger,
-            this.Input,
-            this.Output);
+            this.GetLogger(),
+            this.GetInput(),
+            this.GetOutput());
     }
 
-    public ExecutionContext BuildFromExecutor(
-        IApp app,
-        IModule module,
-        IExecutor executor,
-        string[] executorArgs,
-        bool allowIncomplete)
-    {
-        throw new NotImplementedException();
-    }
+    public abstract ILogger? GetLogger();
 
-    public ILogger? Logger { get; protected set; }
-    public TextReader? Input { get; protected set; }
-    public TextWriter? Output { get; protected set; }
+    public abstract TextReader? GetInput();
+
+    public abstract TextWriter? GetOutput();
 
     #endregion
 }

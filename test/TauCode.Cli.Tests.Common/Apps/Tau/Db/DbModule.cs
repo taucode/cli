@@ -47,4 +47,10 @@ public class DbModule : Module
 
         return sb.ToString();
     }
+
+    protected override void DisposeImpl()
+    {
+        this.Connection?.Dispose();
+        this.Connection = null;
+    }
 }

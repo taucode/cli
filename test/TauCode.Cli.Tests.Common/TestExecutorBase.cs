@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TauCode.Cli.Executors;
 using TauCode.Parsing;
@@ -29,12 +30,22 @@ public class TestExecutorBase : ParsingExecutorBase
     {
     }
 
+    protected override Command CreateCommand(string? executorName, ReadOnlyMemory<char> input)
+    {
+        return new TestCommand(executorName, input);
+    }
+
+    protected override void ExecuteImpl(Command command, ExecutionContext executionContext)
+    {
+        Helper.Dump((TestCommand)command, executionContext.Output!);
+    }
+
     protected override Task ExecuteImplAsync(
         Command command,
         ExecutionContext executionContext,
         CancellationToken cancellationToken = default)
     {
-        Helper.Dump(command, executionContext.Output!);
+        Helper.Dump((TestCommand)command, executionContext.Output!);
         return Task.CompletedTask;
     }
 }

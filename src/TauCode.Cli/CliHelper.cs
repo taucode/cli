@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using TauCode.Cli.Extractors;
 using TauCode.Extensions;
 
 namespace TauCode.Cli;
@@ -107,5 +109,33 @@ public static class CliHelper
 
         input = input[pos..];
         return input;
+    }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+    private static extern IntPtr GetCommandLine();
+
+    private static readonly WinCmdStringExtractor StringExtractor = new();
+
+    public static ReadOnlyMemory<char> GetCommandLineArguments()
+    {
+        var ptr = GetCommandLine();
+        var commandLine = Marshal.PtrToStringAuto(ptr);
+
+        if (commandLine == null)
+        {
+            return null;
+        }
+
+        var span = commandLine.AsSpan();
+
+        var extractionResult = StringExtractor.TryExtract(span, out var executable);
+        if (extractionResult.ErrorCode.HasValue)
+        {
+            return null;
+        }
+
+        var result = commandLine.AsMemory();
+        result = result[extractionResult.CharsConsumed..];
+        return result;
     }
 }

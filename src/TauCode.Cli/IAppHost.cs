@@ -2,7 +2,7 @@
 
 namespace TauCode.Cli;
 
-public interface IAppHost
+public interface IAppHost : IDisposable
 {
     IApp App { get; }
 
@@ -12,7 +12,7 @@ public interface IAppHost
 
     TextWriter? Output { get; set; }
 
-    void Run(string[] args);
+    void Run(ReadOnlyMemory<char> input);
 
-    Task RunAsync(string[] args, CancellationToken cancellationToken = default);
+    Task RunAsync(ReadOnlyMemory<char> input, CancellationToken cancellationToken = default);
 }

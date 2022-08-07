@@ -1,9 +1,8 @@
 ﻿using Serilog;
 
-// todo clean
 namespace TauCode.Cli;
 
-public class AppHost : IAppHost
+public class AppHost : ExecutionContextBuilder, IAppHost
 {
     #region ctor
 
@@ -14,97 +13,27 @@ public class AppHost : IAppHost
 
     #endregion
 
-    #region Private
+    #region Protected
 
-    //private void RunModule(
-    //    IModule module,
-    //    string[] args)
-    //{
-    //    var namelessExecutor = module.GetExecutor(null);
+    protected virtual void DisposeImpl()
+    {
+        // idle
+    }
 
-    //    if (namelessExecutor == null)
-    //    {
-    //        if (args.Length == 0)
-    //        {
-    //            throw new NotImplementedException("error");
-    //        }
+    #endregion
 
-    //        var executorName = args[0];
-    //        var executor = module.GetExecutor(executorName);
+    #region Overridden
 
-    //        if (executor == null)
-    //        {
-    //            throw new NotImplementedException("error");
-    //        }
+    public override ExecutionContext BuildFromSelf(ReadOnlyMemory<char> input, bool allowIncomplete)
+    {
+        throw new NotSupportedException();
+    }
 
-    //        this.RunExecutor(module, executor, args.Skip(1).ToArray());
-    //    }
-    //    else
-    //    {
-    //        this.RunExecutor(module, namelessExecutor, args);
-    //    }
-    //}
+    public override ILogger? GetLogger() => this.Logger;
 
-    //private void RunExecutor(
-    //    IModule module,
-    //    IExecutor executor,
-    //    string[] args)
-    //{
-    //    var input = string.Join(" ", args);
+    public override TextReader? GetInput() => this.Input;
 
-    //    var executionContext = module.CreateExecutionContext(this.Logger, this.Input, this.Output);
-    //    module.CurrentExecutionContext = executionContext;
-
-    //    var tokens = module.Lexer.Tokenize(input.AsMemory());
-
-    //    executor.Execute(tokens, executionContext);
-    //}
-
-    //private async Task RunModuleAsync(
-    //    IModule module,
-    //    string[] args,
-    //    CancellationToken cancellationToken)
-    //{
-    //    var namelessExecutor = module.GetExecutor(null);
-
-    //    if (namelessExecutor == null)
-    //    {
-    //        if (args.Length == 0)
-    //        {
-    //            throw new NotImplementedException("error");
-    //        }
-
-    //        var executorName = args[0];
-    //        var executor = module.GetExecutor(executorName);
-
-    //        if (executor == null)
-    //        {
-    //            throw new NotImplementedException("error");
-    //        }
-
-    //        await this.RunExecutorAsync(module, executor, args.Skip(1).ToArray(), cancellationToken);
-    //    }
-    //    else
-    //    {
-    //        await this.RunExecutorAsync(module, namelessExecutor, args, cancellationToken);
-    //    }
-    //}
-
-    //private async Task RunExecutorAsync(
-    //    IModule module,
-    //    IExecutor executor,
-    //    string[] args,
-    //    CancellationToken cancellationToken)
-    //{
-    //    var input = string.Join(" ", args);
-
-    //    var executionContext = module.CreateExecutionContext(this.Logger, this.Input, this.Output);
-    //    module.CurrentExecutionContext = executionContext;
-
-    //    var tokens = module.Lexer.Tokenize(input.AsMemory());
-
-    //    await executor.ExecuteAsync(tokens, executionContext, cancellationToken);
-    //}
+    public override TextWriter? GetOutput() => this.Output;
 
     #endregion
 
@@ -112,66 +41,32 @@ public class AppHost : IAppHost
 
     public IApp App { get; }
 
-    public ILogger Logger { get; set; }
+    public ILogger? Logger { get; set; }
 
-    public TextReader Input { get; set; }
+    public TextReader? Input { get; set; }
 
-    public TextWriter Output { get; set; }
+    public TextWriter? Output { get; set; }
 
-    public virtual void Run(string[] args)
+    public void Run(ReadOnlyMemory<char> input)
     {
-        var namelessModule = this.App.GetModule(null);
-
-        if (namelessModule == null)
-        {
-            if (args.Length == 0)
-            {
-                throw new NotImplementedException("error");
-            }
-
-            var moduleName = args[0];
-            var module = this.App.GetModule(moduleName);
-            if (module == null)
-            {
-                throw new NotImplementedException("error");
-            }
-
-            throw new NotImplementedException();
-            //this.RunModule(module, args.Skip(1).ToArray());
-        }
-        else
-        {
-            throw new NotImplementedException();
-            //this.RunModule(namelessModule, args);
-        }
+        var context = this.BuildFromApp(this.App, input, false);
+        context.Executor!.Execute(context);
     }
 
-    public virtual async Task RunAsync(string[] args, CancellationToken cancellationToken = default)
+    public async Task RunAsync(ReadOnlyMemory<char> input, CancellationToken cancellationToken = default)
     {
-        var namelessModule = this.App.GetModule(null);
+        var context = this.BuildFromApp(this.App, input, false);
+        await context.Executor!.ExecuteAsync(context, cancellationToken);
+    }
 
-        if (namelessModule == null)
-        {
-            if (args.Length == 0)
-            {
-                throw new NotImplementedException("error");
-            }
+    #endregion
 
-            var moduleName = args[0];
-            var module = this.App.GetModule(moduleName);
-            if (module == null)
-            {
-                throw new NotImplementedException("error");
-            }
+    #region IDisposable
 
-            throw new NotImplementedException();
-            //await this.RunModuleAsync(module, args.Skip(1).ToArray(), cancellationToken);
-        }
-        else
-        {
-            throw new NotImplementedException();
-            //await this.RunModuleAsync(namelessModule, args, cancellationToken);
-        }
+    public void Dispose()
+    {
+        this.App.Dispose();
+        this.DisposeImpl();
     }
 
     #endregion

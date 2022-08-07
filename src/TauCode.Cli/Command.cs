@@ -6,9 +6,10 @@ public class Command : IParsingResult
 {
     #region ctor
 
-    public Command(string? executorName)
+    public Command(string? executorName, ReadOnlyMemory<char> input)
     {
         this.ExecutorName = executorName;
+        this.Input = input;
     }
 
     #endregion
@@ -16,6 +17,8 @@ public class Command : IParsingResult
     #region Public
 
     public string? ExecutorName { get; }
+
+    public ReadOnlyMemory<char> Input { get; }
 
     public Dictionary<string, List<ILexicalToken>> Arguments { get; } = new();
 

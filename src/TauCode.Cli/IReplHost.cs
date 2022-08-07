@@ -1,6 +1,8 @@
-﻿namespace TauCode.Cli;
+﻿using Serilog;
 
-public interface IReplHost : IExecutionContextBuilder
+namespace TauCode.Cli;
+
+public interface IReplHost : IExecutionContextBuilder, IDisposable
 {
     IReadOnlyList<IApp> Apps { get; }
 
@@ -13,9 +15,14 @@ public interface IReplHost : IExecutionContextBuilder
     IModule? CurrentModule { get; }
 
     IExecutor? CurrentExecutor { get; }
-    //string? CurrentExecutorName { get; }
 
     IReadOnlyList<ReplCommandProcessor> CommandProcessors { get; }
+
+    ILogger? Logger { get; set; }
+
+    TextReader? Input { get; set; }
+
+    TextWriter? Output { get; set; }
 
     void Run(string[]? script = null);
 

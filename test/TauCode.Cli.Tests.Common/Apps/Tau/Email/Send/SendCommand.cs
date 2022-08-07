@@ -1,20 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TauCode.Cli.Tests.Common.Apps.Tau.Email.Send;
 
-public class SendCommand : Command
+public class SendCommand : TestCommand
 {
     public class AttachmentInfo
     {
-        public string SourceFilePath { get; set; }
-        public string LocalName { get; set; }
+        public string SourceFilePath { get; set; } = null!;
+        public string LocalName { get; set; } = null!;
         public bool IsInline { get; set; }
     }
 
-    public SendCommand(string executorName)
-        : base(executorName)
+    public SendCommand(string? executorName, ReadOnlyMemory<char> input)
+        : base(executorName, input)
     {
     }
 
-    public List<AttachmentInfo> Attachments { get; } = new List<AttachmentInfo>();
+    public List<AttachmentInfo> Attachments { get; } = new();
 }

@@ -13,21 +13,10 @@ public interface IExecutionContextBuilder
         ReadOnlyMemory<char> appInput,
         bool allowIncomplete);
 
-    ExecutionContext BuildFromApp(
-        IApp app,
-        string[] appArgs,
-        bool allowIncomplete);
-
     ExecutionContext BuildFromModule(
         IApp app,
         IModule module,
         ReadOnlyMemory<char> moduleInput,
-        bool allowIncomplete);
-
-    ExecutionContext BuildFromModule(
-        IApp app,
-        IModule module,
-        string[] moduleArgs,
         bool allowIncomplete);
 
     ExecutionContext BuildFromExecutor(
@@ -37,14 +26,9 @@ public interface IExecutionContextBuilder
         ReadOnlyMemory<char> executorInput,
         bool allowIncomplete);
 
-    ExecutionContext BuildFromExecutor(
-        IApp app,
-        IModule module,
-        IExecutor executor,
-        string[] executorArgs,
-        bool allowIncomplete);
+    ILogger? GetLogger();
 
-    ILogger? Logger { get; }
-    TextReader? Input { get; }
-    TextWriter? Output { get; }
+    TextReader? GetInput();
+
+    TextWriter? GetOutput();
 }

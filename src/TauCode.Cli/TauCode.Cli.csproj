@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TauCode.Parsing" Version="1.5.5-alpha.1.2022-08-11.23-47" />
+    <PackageReference Include="TauCode.Parsing" Version="1.7.0" />
   </ItemGroup>
   
 </Project>

@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TauCode.Cli\TauCode.Cli.csproj" />
     <ProjectReference Include="..\..\test\TauCode.Cli.Tests.Common\TauCode.Cli.Tests.Common.csproj" />
   </ItemGroup>
 

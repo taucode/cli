@@ -1,13 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
-using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SQLite;
-using TauCode.Db;
-using TauCode.Db.Npgsql;
-using TauCode.Db.SqlClient;
-using TauCode.Db.SQLite;
 using TauCode.Extensions;
 using TauCode.Parsing;
 using TauCode.Parsing.TokenProducers;
@@ -86,21 +80,22 @@ public static class DbHelper
         return graph;
     }
 
-    public static IDbUtilityFactory ResolveFactory(IDbConnection connection)
-    {
-        if (connection is SqlConnection)
-        {
-            return SqlUtilityFactory.Instance;
-        }
-        else if (connection is SQLiteConnection)
-        {
-            return SQLiteUtilityFactory.Instance;
-        }
-        else if (connection is NpgsqlConnection)
-        {
-            return NpgsqlUtilityFactory.Instance;
-        }
+    // todo
+    //public static IDbUtilityFactory ResolveFactory(IDbConnection connection)
+    //{
+    //    if (connection is SqlConnection)
+    //    {
+    //        return SqlUtilityFactory.Instance;
+    //    }
+    //    else if (connection is SQLiteConnection)
+    //    {
+    //        return SQLiteUtilityFactory.Instance;
+    //    }
+    //    else if (connection is NpgsqlConnection)
+    //    {
+    //        return NpgsqlUtilityFactory.Instance;
+    //    }
 
-        throw new ArgumentException($"Not supported connection: '{connection.GetType().FullName}'.", nameof(connection));
-    }
+    //    throw new ArgumentException($"Not supported connection: '{connection.GetType().FullName}'.", nameof(connection));
+    //}
 }

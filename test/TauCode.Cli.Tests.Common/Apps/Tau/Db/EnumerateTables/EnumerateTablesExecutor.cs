@@ -20,14 +20,15 @@ public class
         ExecutionContext executionContext,
         CancellationToken cancellationToken)
     {
-        var connection = this.GetOrCreateConnection(command, out var dbProvider);
-        var factory = DbHelper.ResolveFactory(connection);
-        var dbInspector = factory.CreateInspector(connection, null!);
-        var tableNames = dbInspector.GetTableNames();
+        throw new NotImplementedException();
+        //var connection = this.GetOrCreateConnection(command, out var dbProvider);
+        //var factory = DbHelper.ResolveFactory(connection);
+        //var dbInspector = factory.CreateInspector(connection, null!);
+        //var tableNames = dbInspector.GetTableNames();
 
-        foreach (var tableName in tableNames)
-        {
-            await executionContext.Output!.WriteLineAsync(tableName.AsMemory(), cancellationToken);
-        }
+        //foreach (var tableName in tableNames)
+        //{
+        //    await executionContext.Output!.WriteLineAsync(tableName.AsMemory(), cancellationToken);
+        //}
     }
 }

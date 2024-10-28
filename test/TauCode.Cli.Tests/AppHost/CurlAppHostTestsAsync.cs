@@ -5,6 +5,8 @@ using TauCode.Cli.Tests.Common;
 using TauCode.Cli.Tests.Common.Apps.Curl;
 using TauCode.IO;
 
+#pragma warning disable NUnit1032
+
 namespace TauCode.Cli.Tests.AppHost;
 
 [TestFixture]
